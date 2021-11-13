@@ -58,7 +58,7 @@ Links that might help:
 - https://docs.px4.io/master/en/simulation/gazebo.html
 - http://gazebosim.org/tutorials?tut=build_world
 
-The default PX4-Autopilot SITL launches gazebo in the `empty_world` but is not WGS84 enabled. In our world file we will need a `spherical_coordinates` tag, e.g.:
+The default PX4-Autopilot SITL launches gazebo in the `empty.world` but is not WGS84 enabled. In our world file we will need a `spherical_coordinates` tag, e.g.:
 ```
 <spherical_coordinates>
     <surface_model>EARTH_WGS84</surface_model>
