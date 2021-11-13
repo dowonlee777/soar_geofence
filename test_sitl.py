@@ -2,6 +2,7 @@
 
 from mavsdk import System
 from mavsdk.action import ActionError
+from mavsdk.telemetry import FlightMode
 import asyncio
 import subprocess
 import os
@@ -14,14 +15,20 @@ LON = -78.79709535136203
 class Uav():
     def __init__(self):
         self.vehicle = None
-        self.flight_mode = None
+        self.flight_mode = FlightMode(9)
         self.tasks = {}
 
     async def run(self):
         print('Connecting to sitl')
         await self.connectSim(LAT, LON, 170)
         await self.create_flight_mode_task()
-        # await self.mav_arm_takeoff(self)
+
+        while self.flight_mode.value != 3:
+            print(type(self.flight_mode))
+            # print('Waiting for Flight Mode: HOLD... | Current: %s' % self.flight_mode)
+            await asyncio.sleep(1)
+
+        await self.mav_arm_takeoff(self)
 
         while(True):
             await asyncio.sleep(1)

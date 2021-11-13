@@ -6,20 +6,6 @@ This course project is motivated by SOAR, an outdoor facility for drone research
 
 Similarly, we will also implement a low altitude boundary to ensure a drone does not crash in the middle of a flight (This must be switched off when a land command is given).
 
-
-
-### Simulation World
-
-The soar_rover project has the facility visualized in Cesium, but does not have a gazebo world. For our project, we will build a gazebo world of the facility to conduct our simulation.
-
-Links that might help:
-
-- https://github.com/optimatorlab/SOAR
-- https://docs.px4.io/master/en/simulation/gazebo_worlds.html
-- https://docs.px4.io/master/en/simulation/gazebo.html
-- http://gazebosim.org/tutorials?tut=build_world
-
-
 ### PX4-MAVSDK
 
 Our simulated drone will be running PX4 SITL in gazebo, thus we will use MAVSDK to connect and send commands.
@@ -60,10 +46,38 @@ You can run the SITL (quadrotor) in gazebo with
 ```
 make px4_sitl gazebo
 ```
-To run the headless version:
+
+### Simulation World
+
+The soar_rover project has the facility visualized in Cesium, but does not have a gazebo world. For our project, we will build a gazebo world of the facility to conduct our simulation.
+
+Links that might help:
+
+- https://github.com/optimatorlab/SOAR
+- https://docs.px4.io/master/en/simulation/gazebo_worlds.html
+- https://docs.px4.io/master/en/simulation/gazebo.html
+- http://gazebosim.org/tutorials?tut=build_world
+
+The default PX4-Autopilot SITL launches gazebo in the `empty_world` but is not WGS84 enabled. In our world file we will need a `spherical_coordinates` tag, e.g.:
 ```
-HEADLESS=1 make px4_sitl gazebo
+<spherical_coordinates>
+    <surface_model>EARTH_WGS84</surface_model>
+    <latitude_deg>42.99549724619581</latitude_deg>
+    <longitude_deg>-78.79709535136203</longitude_deg>
+    <elevation>170</elevation>
+</spherical_coordinates>
 ```
+
+Note: The launched gazebo environment doesn't allow us to zoom well, to do this edit the `sitl_run.sh` script to look like this:
+```
+# Disable follow mode
+if [[ "$PX4_NO_FOLLOW_MODE" != "1" ]]; then
+    follow_mode=""
+else
+    follow_mode="--gui-client-plugin libgazebo_user_camera_plugin.so"
+fi
+```
+
 
 ### Joystick Control
 
