@@ -16,6 +16,7 @@ Links that might help:
 
 - https://github.com/optimatorlab/SOAR
 - https://docs.px4.io/master/en/simulation/gazebo_worlds.html
+- https://docs.px4.io/master/en/simulation/gazebo.html
 - http://gazebosim.org/tutorials?tut=build_world
 
 
