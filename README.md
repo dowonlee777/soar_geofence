@@ -26,6 +26,45 @@ Our simulated drone will be running PX4 SITL in gazebo, thus we will use MAVSDK 
 
 - https://docs.px4.io/master/en/simulation/gazebo.html
 
+Here is roughly what I did for installations to get started.
+
+## MAVSDK
+```
+pip3 install mavsdk
+or
+pip install mavsdk
+```
+
+## PX4-Autopilot
+https://docs.px4.io/master/en/dev_setup/dev_env_linux_ubuntu.html#gazebo-jmavsim-and-nuttx-pixhawk-targets
+
+Clone the repo in your HOME directory.
+```
+cd ~
+git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+```
+```
+bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+```
+I also had to run the following, which I then placed in `.bashrc`
+```
+source /usr/share/gazebo/setup.bash
+```
+### To Run
+
+Navigate to `PX4-Autopilot`
+```
+cd ~/PX4-Autopilot
+```
+You can run the SITL (quadrotor) in gazebo with
+```
+make px4_sitl gazebo
+```
+To run the headless version:
+```
+HEADLESS=1 make px4_sitl gazebo
+```
+
 ### Joystick Control
 
 The drone will be controlled via an Xbox controller, using the `pygame` library. Similar to the actual radio controller, the left stick will control the throttle and yaw, the right stick will control pitch and roll. The signals will need to be mapped accordingly.
