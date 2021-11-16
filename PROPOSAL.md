@@ -37,9 +37,8 @@ Team Members:
   - [ ] Generate ground potentially pulled from Open Maps
   - [ ] If it makes sense also add the threee grass mounds
 - [ ] Create progress report.  *Due Nov. 20*
-- [ ] {add more tasks here}
+- [ ] Necessary changes found due to errors arised during progress update 
 - [ ] Create final presentation.  *Due Dec. 4*
-- [ ] {you might have some more tasks here}
 - [ ] Provide system documentation (README.md).  *Due Dec. 14*
 
 
