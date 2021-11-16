@@ -29,7 +29,7 @@ Team Members:
 {What are the tasks that you need to complete?  Who is going to do them?  When will they be completed?}
 - [x] Complete this proposal document.  *Due Nov. 2*
 - [x] Research into suspected future problems or topics not covered in class 
-- [ ] Custom SOAR Gazebo Model 
+- [ ] Custom SOAR Gazebo Model, DC
   - [ ] Create Main Poles x13
     - [ ] Correct Color, Location, & Size
   - [ ] Lights x2
