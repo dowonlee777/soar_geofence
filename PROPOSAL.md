@@ -1,4 +1,3 @@
-*NOTE TO STUDENTS:  This is a template for your **proposal**.  Items wrapped inside `{}` should be replaced accordingly.*
 
 *Your updated proposal document (this file) is due on Tuesday, November 23, at 2:20pm.*
 
