@@ -22,6 +22,7 @@ class Uav():
         print('Connecting to sitl')
         await self.connectSim(LAT, LON, 170)
         await self.create_flight_mode_task()
+        self.tasks['telem'] = asyncio.create_task(self.telemetry_position())
 
         while self.flight_mode.value != 3:
             print(type(self.flight_mode))
@@ -71,6 +72,10 @@ class Uav():
                 ['xterm', '-e', '%s;%s;%s;make px4_sitl gazebo' % (lat_var, lon_var, alt_var)],
                 cwd='%s/PX4-Autopilot' % HOME_DIRECTORY,
             )
+
+    async def telemetry_position(self):
+        async for position in self.vehicle.telemetry.position():
+            print(float(position.latitude_deg), float(position.longitude_deg), position.relative_altitude_m, position.absolute_altitude_m)
 
     async def create_flight_mode_task(self):
         self.tasks['flight_mode'] = asyncio.create_task(self.flight_mode_change())

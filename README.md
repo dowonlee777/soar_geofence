@@ -6,7 +6,11 @@ This course project is motivated by SOAR, an outdoor facility for drone research
 
 Similarly, we will also implement a low altitude boundary to ensure a drone does not crash in the middle of a flight (This must be switched off when a land command is given).
 
-### PX4-MAVSDK
+We will leverage ROS to share information between the SITL, joystick controller and geofence monitor nodes. The planned framework is roughly scripted in the flowchart below.
+
+![](images/soar_geofence_gazebo_ros.png)
+
+## PX4-MAVSDK
 
 Our simulated drone will be running PX4 SITL in gazebo, thus we will use MAVSDK to connect and send commands.
 
@@ -14,14 +18,12 @@ Our simulated drone will be running PX4 SITL in gazebo, thus we will use MAVSDK 
 
 Here is roughly what I did for installations to get started.
 
-## MAVSDK
+### MAVSDK
 ```
 pip3 install mavsdk
-or
-pip install mavsdk
 ```
 
-## PX4-Autopilot
+### PX4-Autopilot
 https://docs.px4.io/master/en/dev_setup/dev_env_linux_ubuntu.html#gazebo-jmavsim-and-nuttx-pixhawk-targets
 
 Clone the repo in your HOME directory.
@@ -36,7 +38,7 @@ I also had to run the following, which I then placed in `.bashrc`
 ```
 source /usr/share/gazebo/setup.bash
 ```
-### To Run
+#### To Run in Terminal
 
 Navigate to `PX4-Autopilot`
 ```
@@ -47,7 +49,7 @@ You can run the SITL (quadrotor) in gazebo with
 make px4_sitl gazebo
 ```
 
-### Simulation World
+## Simulation World
 
 The soar_rover project has the facility visualized in Cesium, but does not have a gazebo world. For our project, we will build a gazebo world of the facility to conduct our simulation.
 
@@ -77,13 +79,11 @@ else
     follow_mode="--gui-client-plugin libgazebo_user_camera_plugin.so"
 fi
 ```
-
-
-### Joystick Control
+## Joystick Control
 
 The drone will be controlled via an Xbox controller, using the `pygame` library. Similar to the actual radio controller, the left stick will control the throttle and yaw, the right stick will control pitch and roll. The signals will need to be mapped accordingly.
 
 - https://github.com/optimatorlab/m3c_wg/blob/master/catkin_ws_gcs/m3c_wg/scripts/m3c_wg_joystick.py
 
-### Geofence/Avoidance
+## Geofence/Avoidance
 
