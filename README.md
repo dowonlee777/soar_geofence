@@ -8,7 +8,7 @@ Similarly, we will also implement a low altitude boundary to ensure a drone does
 
 We will leverage ROS to share information between the SITL, joystick controller and geofence monitor nodes. The planned framework is roughly scripted in the flowchart below.
 
-![Framework](images/soar_geofence_gazebo_ros_diagram.png)
+![Framework](images/soar_geofence_framework.png)
 
 ## PX4-MAVSDK
 
