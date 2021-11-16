@@ -10,7 +10,7 @@
 
 Team Members:
 - {Member 1 Name}, {Member 1 email}
-- {Member 2 Name}, {Member 2 email}
+- Dylan Czubak, dylanczu@buffalo.edu
 
 --- 
 
