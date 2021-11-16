@@ -28,7 +28,9 @@ Team Members:
 ## Milestones/Schedule Checklist
 {What are the tasks that you need to complete?  Who is going to do them?  When will they be completed?}
 - [x] Complete this proposal document.  *Due Nov. 2*
-- [ ] {add tasks here}
+- [ ] Research into suspected future problems or topics not covered in class 
+- [ ] Custom SOAR Gzaebo Model 
+  - [ ] Test sub task 
 - [ ] Create progress report.  *Due Nov. 20*
 - [ ] {add more tasks here}
 - [ ] Create final presentation.  *Due Dec. 4*
