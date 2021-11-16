@@ -31,9 +31,9 @@ Team Members:
 - [x] Research into suspected future problems or topics not covered in class 
 - [ ] Custom SOAR Gazebo Model 
   - [ ] Create Main Poles x13
-        - [ ] Correct Color, Location, & Size
+    - [ ] Correct Color, Location, & Size
   - [ ] Lights x2
-        - [ ] Using light id: 1 as the origin of the model, with everything built off this dimension wise
+    - [ ] Using light id: 1 as the origin of the model, with everything built off this dimension wise
   - [ ] Generate ground potentially pulled from Open Maps
   - [ ] If it makes sense also add the threee grass mounds
 - [ ] Create progress report.  *Due Nov. 20*
