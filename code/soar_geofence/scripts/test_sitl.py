@@ -48,7 +48,7 @@ class Uav():
 
     async def connectSim(self, lat, lon, altMSL):
         try:
-            self.open_sitl(lat, lon, altMSL)
+            # self.open_sitl(lat, lon, altMSL)
             # self.sitl_proc = await asyncio.create_subprocess_shell(
             #     'HEADLESS=1 make px4_sitl gazebo',
             #     cwd='%s/PX4-Autopilot' % HOME_DIRECTORY,
