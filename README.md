@@ -3,6 +3,75 @@
 - This repo is where you will store **all** of your documents for the course project.
 - Please see [PROPOSAL.md](PROPOSAL.md) for a template for your **proposal**.
 
+## Getting Started
+
+mavsdk-Python `v0.20.0` and PX4-Autopilot SITL is required. See installations below.
+
+### MAVSDK
+```
+pip3 install mavsdk==0.20.0
+```
+
+### PX4-Autopilot
+
+- https://docs.px4.io/master/en/simulation/gazebo.html
+- https://docs.px4.io/master/en/dev_setup/dev_env_linux_ubuntu.html#gazebo-jmavsim-and-nuttx-pixhawk-targets
+
+Clone the repo in your HOME directory.
+```
+cd ~
+git clone https://github.com/PX4/PX4-Autopilot.git --recursive
+```
+Run the following, this may take some time.
+```
+bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
+```
+### Gazebo
+
+Open `~/.bashrc`
+```
+pico ~/.bashrc
+```
+Copy and paste the following:
+```
+source /usr/share/gazebo-11/setup.bash
+```
+
+### soar_geofence
+
+Clone our repo in your `Projects` directory:
+```
+cd ~/Projects
+git clone https://github.com/dowonlee777/soar_geofence.git
+```
+
+Make sure `sitl.sh` is executable
+```
+cd soar_geofence/code/soar_geofence/scripts
+chmod +x ./sitl.sh
+```
+
+### Catkin Workspace
+
+Assumes you have a catkin workspace at `~/catkin_ws`.
+
+Create our package once:
+```
+cd ~/catkin_ws/src
+catkin_create_pkg soar_geofence
+```
+Copy and paste our `soar_geofence/code/soar_geofence` directory into the `~/catkin_ws/src` directory
+
+```
+cp -R ~/Projects/soar_geofence/code/geofence ~/catkin_ws/src
+```
+Build/make project:
+```
+cd ~/catkin_ws
+catkin_make
+```
+
+
 --- 
 
 ## IMPORTANT DATES:
