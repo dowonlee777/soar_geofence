@@ -35,7 +35,8 @@ We will leverage ROS to share information between the SITL, joystick controller 
     - [ ] Correct Color, Location, & Size
   - [ ] Lights x2
     - [ ] Using light id: 1 as the origin of the model, with everything built off this dimension wise
-  - [ ] Generate ground potentially pulled from Open Maps
+  - [ ] Generate materials folder for asphault ground 
+  - [ ] Find suitable replacement for enclosement mesh/ wire 
   - [ ] If it makes sense also add the three grass mounds
 - [ ] Setting up Gazebo Sim and PX4 SITL
     - [x] Installation of PX4-Autopilot and mavsdk-Python. See README.md
