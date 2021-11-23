@@ -34,7 +34,7 @@ We will leverage ROS to share information between the SITL, joystick controller 
   - [ ] Create Main Poles x13
     - [ ] Correct Color, Location, & Size
   - [ ] Lights x2
-    - [ ] Using light id: 1 as the origin of the model, with everything built off this dimension wise
+    - [ ] Using Pole #10: 1 as the origin of the model, with everything built off this dimension wise
   - [ ] Generate materials folder for asphault ground 
   - [ ] Find suitable replacement for enclosement mesh/ wire 
   - [ ] If it makes sense also add the three grass mounds
