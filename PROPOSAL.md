@@ -63,7 +63,7 @@ We will leverage ROS to share information between the SITL, joystick controller 
 
 ## Measures of Success
 {How will you know you succeeded?  If you were to receive partial credit, what should we look for?}
-
+- [] 
 
 ---
 **A Sample Proposal Appears Below**
