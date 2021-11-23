@@ -19,6 +19,7 @@ We will leverage ROS to share information between the SITL, joystick controller 
 
 
 ## Contributions
+- Gazebo World of SOAR
 - Proactive geofence logic
 
 
