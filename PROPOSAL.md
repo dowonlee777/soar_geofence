@@ -24,7 +24,7 @@ We will leverage ROS to share information between the SITL, joystick controller 
 
 ## Project Plan
 
-First we'll build the Gazebo world of SOAR and the PX4 SITL in the world. We will rely on PX4 and MAVSDK documentation to implement the SITL and use basic ROS messages/services to communicate between the nodes. 
+First we'll build the Gazebo world of SOAR. Then we will get the PX4 SITL to run in the world, with GPS data enabled. We'll use PX4 and MAVSDK documentation to implement the SITL and use basic ROS messages/services to communicate between the nodes. 
 
 
 ## Milestones/Schedule Checklist
