@@ -63,7 +63,12 @@ We will leverage ROS to share information between the SITL, joystick controller 
 
 ## Measures of Success
 {How will you know you succeeded?  If you were to receive partial credit, what should we look for?}
-- [] 
+- Working Custom Gazebo Model
+- Ability to launch PX4 drone in model and move around freely 
+- Demonstrate our geofence code 
+
+
+
 
 ---
 **A Sample Proposal Appears Below**
