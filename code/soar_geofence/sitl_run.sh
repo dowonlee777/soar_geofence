@@ -28,6 +28,8 @@ world="$3"
 src_path="${HOME}/PX4-Autopilot"
 build_path="${HOME}/PX4-Autopilot/build/px4_sitl_default"
 
+export soar_geo_path="${HOME}/catkin_ws/src/soar_geofence"
+
 export PX4_HOME_LAT=42.99549724619581
 export PX4_HOME_LON=-78.79709535136203
 export PX4_HOME_ALT=150
@@ -45,6 +47,7 @@ echo src_path: $src_path
 echo build_path: $build_path
 
 rootfs="$build_path/tmp/rootfs" # this is the working directory
+# rootfs="$soar_geo_path/build/rootfs"
 mkdir -p "$rootfs"
 
 # To disable user input
@@ -242,8 +245,9 @@ set +e
 if [[ ${model} == test_* ]] || [[ ${model} == *_generated ]]; then
 	sitl_command="\"$sitl_bin\" $no_pxh \"$src_path\"/ROMFS/px4fmu_test -s \"${src_path}\"/posix-configs/SITL/init/test/${model} -t \"$src_path\"/test_data"
 else
-	sitl_command="\"$sitl_bin\" $no_pxh \"${PWD}\" -s rcS -t \"$src_path\"/test_data"
-	#sitl_command="\"$sitl_bin\" $no_pxh \"$build_path\"/etc -s etc/init.d-posix/rcS -t \"$src_path\"/test_data"
+	sitl_command="\"$sitl_bin\" $no_pxh \"$build_path\"/etc -s ${soar_geo_path}/px4/etc/rcS -t \"$src_path\"/test_data"
+	# sitl_command="\"$sitl_bin\" $no_pxh \"$build_path\"/etc -w ${soar_geo_path}/px4/rootfs -s ${soar_geo_path}/px4/etc/rcS -t \"$src_path\"/test_data"
+	# sitl_command="\"$sitl_bin\" $no_pxh \"$build_path\"/etc -s etc/init.d-posix/rcS -t \"$src_path\"/test_data"
 fi
 
 echo SITL COMMAND: $sitl_command
