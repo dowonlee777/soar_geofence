@@ -134,9 +134,10 @@ class Uav():
 
         await self.create_flight_mode_task()
 
+        print('Setting up ROS...')
         await self.ros_setup()
 
-        # self.tasks['pub_telem'] = self._event_loop.create_task(self.pubTelem(TELEM_PUB_RATE), name='pub_telem')
+        await self.clear_mission()
 
         await self.running()
     
@@ -428,6 +429,15 @@ class Uav():
         async for metric in self.vehicle.telemetry.fixedwing_metrics():
             self.telem.airSpeed = metric.airspeed_m_s
 
+    async def clear_mission(self):
+        print('Removing mission...')
+        try:
+            await self.vehicle.mission.clear_mission()
+        except Exception as e:
+            print('WTF:', e)
+        else:
+            self.hasMission = False
+            print('Done.')
     
     async def cancel_tasks(self):
         for task in self.tasks.values():
