@@ -30,11 +30,12 @@ else
 fi
 
 # https://stackoverflow.com/questions/3512055/avoid-gnome-terminal-close-after-script-execution
+START_ROS="roscore"
 SCRIPT1="./sitl_run.sh iris gazebo empty"
 SCRIPT2="rosrun soar_geofence uav.py"
 SCRIPT3="rosrun soar_geofence joystick.py"
 
-gnome-terminal --tab --title "START ROS" -e "roscore"
+gnome-terminal --tab --title "ROS" -e "bash -ic \"export HISTFILE=${HOME}/.bash_history_junk1; $START_ROS; history -s $START_ROS; exec bash\"" 
 
 sleep 3s
 

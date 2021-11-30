@@ -41,7 +41,7 @@ XBox Controller Details:
 		Allow user to use a button to toggle teleop mode on/off
 '''
 
-REFRESH_RATE = 10
+REFRESH_RATE = 2
 
 class Axis(enum.Enum):
     YAW_AXIS        = 0
@@ -190,12 +190,16 @@ class UavJoystick():
             clock.tick(REFRESH_RATE)
 
     def publish_button_press(self, button):
+        cmd = mav_cmd()
         if button == 8:
-            cmd = mav_cmd()
             cmd.command = MAV_CMD.MAV_ARM.value
             # cmd.command = MAV_CMD.MAV_ARM_AND_TAKEOFF.value
-            self.pub_mav_cmd.publish(cmd)
+        elif button == 0:
+            cmd.command = MAV_CMD.MAV_LAND.value
+        elif button == 3:
+            cmd.command = MAV_CMD.MAV_ARM_AND_TAKEOFF.value
 
+        self.pub_mav_cmd.publish(cmd)
 
     def shutdown(self):
         rospy.loginfo("Shutting down the Joystick node...")

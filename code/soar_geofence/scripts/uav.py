@@ -98,7 +98,7 @@ class Uav():
         }
         self.publishTelem = True
 
-        #self.setpoints = deque()
+        self.setpoints = deque()
         self.setpoint = None
         self.offboard_starting = False
         # ---
@@ -135,6 +135,8 @@ class Uav():
         await self.create_flight_mode_task()
 
         await self.ros_setup()
+
+        # self.tasks['pub_telem'] = self._event_loop.create_task(self.pubTelem(TELEM_PUB_RATE), name='pub_telem')
 
         await self.running()
     
@@ -177,10 +179,10 @@ class Uav():
         THIS IS A THREAD
         '''
         threadRate = rospy.Rate(rate)
-
+        t_msg             = telem()
         while not rospy.is_shutdown():
             try:
-                t_msg             = telem()
+                
                 # t_msg.assetID     = self.assetID
                 t_msg.lat		  = self.telem.lat
                 t_msg.lon		  = self.telem.lon
@@ -234,7 +236,7 @@ class Uav():
         if self.flight_mode.name == FlightMode.OFFBOARD.name:
             # self.setpoints.append(msg)
             self.setpoint = msg
-        elif not self.offboard_starting and self.armed:
+        elif not self.offboard_starting and self.armed and not (msg.vx + msg.vy + msg.vz == 0):
             self.offboard_starting = True
             self.tasks['currentMavCmd'] = self._event_loop.create_task(self.userMavCmdProto[MAV_CMD.MAV_START_OFFBOARD.value](), name='currentMavCmd')
 
@@ -290,7 +292,7 @@ class Uav():
         except:
             pass
         else:
-            target_alt = msg.param1
+            target_alt = 5 # msg.param1
             await self.vehicle.action.set_takeoff_altitude(target_alt)
             self.tasks['monitor_takeoff'] = asyncio.create_task(self.monitor_takeoff(), name='monitor_takeoff')
             await self.vehicle.action.takeoff()
@@ -334,34 +336,29 @@ class Uav():
             print('>> Disarming...')
             await self.vehicle.action.disarm()
         else:
-            # print('Waiting for offboard mode...')
+            print('Waiting for offboard mode...')
             while self.flight_mode.name != FlightMode.OFFBOARD.name:
                 await asyncio.sleep(1)
+            
+            await asyncio.sleep(1)
             print('Offboard Ready.')
+            
             self.tasks['stream_setpoints'] = self._event_loop.create_task(self.stream_setpoints(SETPOINT_RATE), name='stream_setpoints')
-            # self._event_loop.run_in_executor(ProcessPoolExecutor(1), self.stream_setpoints, args=(SETPOINT_RATE,))
-            # setpointThread = threading.Thread(target=self.stream_setpoints, args=(SETPOINT_RATE,))
-            # setpointThread.start()
 
     async def stream_setpoints(self, rate):
-        sleep_rate = rospy.Rate(rate)
-        while(True):
-            if self.flight_mode.name != FlightMode.OFFBOARD.name:
-                break
-            # elif self.setpoint.vx + self.setpoint.vy + self.setpoint.vz == 0:
-            #     await self.vehicle.offboard.set_velocity_body(VelocityBodyYawspeed(self.setpoint.vx, self.setpoint.vy, self.setpoint.vz, self.setpoint.yaw))
 
-            #     print('stay')
-            #     await self.vehicle.offboard.set_position_velocity_ned(PositionNedYaw(self.telem.altAGL, 0.0, 0.0, 0.0), VelocityNedYaw(0,0,0,0))
-            # elif len(self.setpoints) > 10:
-            #     sp = self.setpoints.popleft()
-            #     await self.vehicle.offboard.set_velocity_body(VelocityBodyYawspeed(sp.vx, sp.vy, sp.vz, sp.yaw))
-            #     # await self.vehicle.offboard.set_position_velocity_ned(PositionNedYaw(5.0, 0.0, 0.0, 0.0), VelocityNedYaw(1,0,0,0))
-            else:
-                await self.vehicle.offboard.set_velocity_body(VelocityBodyYawspeed(self.setpoint.vx, self.setpoint.vy, self.setpoint.vz, self.setpoint.yaw))
-                # await self.vehicle.offboard.set_position_velocity_ned(PositionNedYaw(self.telem.altAGL, 0.0, 0.0, 0.0), VelocityNedYaw(0,0,0,0))
-            
-            sleep_rate.sleep()
+        async for sp in self.setpoint_stream(rate):
+            try:
+                await self.vehicle.offboard.set_velocity_body(VelocityBodyYawspeed(sp.vx, sp.vy, sp.vz, sp.yaw))
+            except Exception as e:
+                print(e)
+
+
+    async def setpoint_stream(self, rate):
+        while self.flight_mode.name == FlightMode.OFFBOARD.name:
+            yield self.setpoint
+            await asyncio.sleep(1/rate)
+
 
     #############################################################################################################
     # --------------------------------------   Vehicle Class Functions ---------------------------------------- #
