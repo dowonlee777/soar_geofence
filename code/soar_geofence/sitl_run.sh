@@ -160,7 +160,7 @@ elif [ "$program" == "gazebo" ] && [ ! -n "$no_sim" ]; then
 		# 	fi
 		# fi
 		# export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:${src_path}/Tools/sitl_gazebo/models
-		world_path="${HOME}/Projects/soar_geofence/code/soar_geofence/worlds/$world.world"
+		world_path="${HOME}/catkin_ws/src/soar_geofence/worlds/$world.world"
 		gzserver $verbose $world_path $ros_args &
 		SIM_PID=$!
 
