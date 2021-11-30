@@ -31,7 +31,7 @@ fi
 
 # https://stackoverflow.com/questions/3512055/avoid-gnome-terminal-close-after-script-execution
 START_ROS="roscore"
-SCRIPT1="./sitl_run.sh iris gazebo empty"
+SCRIPT1="./sitl_run.sh iris gazebo SOAR_World"
 SCRIPT2="rosrun soar_geofence uav.py"
 SCRIPT3="rosrun soar_geofence joystick.py"
 
