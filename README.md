@@ -26,16 +26,6 @@ Run the following, this may take some time.
 ```
 bash ./PX4-Autopilot/Tools/setup/ubuntu.sh
 ```
-### Gazebo
-
-Open `~/.bashrc`
-```
-pico ~/.bashrc
-```
-Copy and paste the following:
-```
-source /usr/share/gazebo-11/setup.bash
-```
 
 ### soar_geofence
 
@@ -71,6 +61,16 @@ cd ~/catkin_ws
 catkin_make
 ```
 
+### To Run
+
+Have a joystick controller (Xbox 360) connected via USB.
+
+Then run:
+
+```
+cd ~/catkin_ws/src/soar_geofence
+./launch_soar_geofence.sh
+```
 
 --- 
 

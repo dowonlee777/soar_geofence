@@ -1,0 +1,17 @@
+float64 lat 
+float64 lon 
+float64 epsLat
+float64 epsLon
+float64 altMSL
+float64 altAGL
+float64 epsAltMSL
+float64 heading
+float64 roll
+float64 pitch
+float64 yaw
+float64 airSpeed
+float64 groundSpeed
+float64 epsSpeed
+float64 vx
+float64 vy
+float64 vz
