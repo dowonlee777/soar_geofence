@@ -109,6 +109,14 @@ class Uav():
         self.armed = False
         self.add_user_mav_cmds()
 
+        self.run_geofence = False
+        self.geofence = [
+            [42.99559635044619, -78.79735971011293, 181.28],
+            [42.99531277502557, -78.79685522306578, 180.59],
+            [42.99551134918702, -78.79665526993782, 180.9],
+            [42.99579492459777, -78.79715975860931, 181.44]
+        ]
+
     def add_user_mav_cmds(self):
         self.userMavCmdProto[MAV_CMD.MAV_ARM.value] = self.mav_arm
         self.userMavCmdProto[MAV_CMD.MAV_ARM_AND_TAKEOFF.value] = self.mav_arm_takeoff
@@ -241,6 +249,22 @@ class Uav():
             self.offboard_starting = True
             self.tasks['currentMavCmd'] = self._event_loop.create_task(self.userMavCmdProto[MAV_CMD.MAV_START_OFFBOARD.value](), name='currentMavCmd')
 
+    def monitor_geofence(self, rate):
+        sleepRate = rospy.Rate(rate)
+        while True:
+            if not self.run_geofence:
+                break
+            if self.setpoint.vz > 0:
+                if self.telem.altAGL < 1:
+                    self.setpoint.vz = 0
+
+            if self.setpoint.vz < 0:
+                if self.telem.altAGL > 20:
+                    self.setpoint.vz = 0
+            
+
+            sleepRate.sleep()
+
     # ============================================================================================= #
     #                                         END ROS Functions                                     #
     #################################################################################################
@@ -343,6 +367,10 @@ class Uav():
             
             await asyncio.sleep(1)
             print('Offboard Ready.')
+
+            self.run_geofence = True
+            geofenceThread = threading.Thread(target=self.monitor_geofence, args=(2,))
+            geofenceThread.start()
             
             self.tasks['stream_setpoints'] = self._event_loop.create_task(self.stream_setpoints(SETPOINT_RATE), name='stream_setpoints')
 
@@ -451,6 +479,7 @@ class Uav():
     async def shutdown(self, sig):
         print(sig)
         self.publishTelem = False
+        self.run_geofence = False
 
         print('Cancelling Asyncio Tasks...')
         tasks = [t for t in asyncio.all_tasks() if t.get_name() != 'shutdown' and t.get_name() != 'main']
