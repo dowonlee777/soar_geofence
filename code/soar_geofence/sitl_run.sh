@@ -8,7 +8,7 @@ set -e
 # unset LD_LIBRARY_PATH
 
 # source "${HOME}/.bashrc"
-source "/usr/share/gazebo-11/setup.sh"
+source "/usr/share/gazebo-11/setup.bash"
 
 if [ "$#" -lt 3 ]; then
 	echo usage: sitl_run.sh model program world
@@ -130,11 +130,11 @@ elif [ "$program" == "gazebo" ] && [ ! -n "$no_sim" ]; then
 		fi
 
 		# Set the plugin path so Gazebo finds our model and sim
-		# source "$src_path/Tools/setup_gazebo.bash" "${src_path}" "${build_path}"
-		export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:${src_path}/Tools/sitl_gazebo/models
-		echo GAZEBO_MODEL_PATH: ${GAZEBO_MODEL_PATH}
-		echo GAZEBO_PLUGIN_PATH: ${GAZEBO_PLUGIN_PATH}
-		echo LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}
+		source "$src_path/Tools/setup_gazebo.bash" "${src_path}" "${build_path}"
+		# export GAZEBO_MODEL_PATH=$GAZEBO_MODEL_PATH:${src_path}/Tools/sitl_gazebo/models
+		# echo GAZEBO_MODEL_PATH: ${GAZEBO_MODEL_PATH}
+		# echo GAZEBO_PLUGIN_PATH: ${GAZEBO_PLUGIN_PATH}
+		# echo LD_LIBRARY_PATH: ${LD_LIBRARY_PATH}
 		# # source "/usr/share/gazebo-11/setup.bash"
 		# if [ -z $PX4_SITL_WORLD ]; then
 		# 	#Spawn predefined world
