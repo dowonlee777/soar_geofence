@@ -21,13 +21,13 @@ else
 	done
 fi
 
-if [ -n "$LAT" ] && [ -n "$LON" ]; then
-	export PX4_HOME_LAT=$LAT
-	export PX4_HOME_LON=$LON
-else
-	export PX4_HOME_LAT=42.9955301
-	export PX4_HOME_LON=-78.7970664
-fi
+# if [ -n "$LAT" ] && [ -n "$LON" ]; then
+# 	export PX4_HOME_LAT=$LAT
+# 	export PX4_HOME_LON=$LON
+# else
+# 	export PX4_HOME_LAT=42.9955301
+# 	export PX4_HOME_LON=-78.7970664
+# fi
 
 PROCESS="ros"
 RESULT=`pgrep ${PROCESS}`

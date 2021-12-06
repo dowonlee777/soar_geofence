@@ -23,38 +23,38 @@ world="$3"
 src_path="${HOME}/PX4-Autopilot"
 build_path="${HOME}/PX4-Autopilot/build/px4_sitl_default"
 
-for i in "$@"; do
-	case $i in 
-		--lat=*)
-		LAT="${i#*=}" # regex sub remove "=" and anything before
-		shift # past argument=value
-		;;
-		--lon=*)
-		LON="${i#*=}"
-		shift
-		;;
-		*)
-		;;
-	esac
-done
+# for i in "$@"; do
+# 	case $i in 
+# 		--lat=*)
+# 		LAT="${i#*=}" # regex sub remove "=" and anything before
+# 		shift # past argument=value
+# 		;;
+# 		--lon=*)
+# 		LON="${i#*=}"
+# 		shift
+# 		;;
+# 		*)
+# 		;;
+# 	esac
+# done
 
-if [ -n "$LAT" ] && [ -n "$LON" ]; then
-	export PX4_HOME_LAT=$LAT
-	export PX4_HOME_LON=$LON
-else
-	export PX4_HOME_LAT=42.9955301
-	export PX4_HOME_LON=-78.7970664
-fi
+# if [ -n "$LAT" ] && [ -n "$LON" ]; then
+# 	export PX4_HOME_LAT=$LAT
+# 	export PX4_HOME_LON=$LON
+# else
+# 	export PX4_HOME_LAT=42.9955301
+# 	export PX4_HOME_LON=-78.7970664
+# fi
 
-ORIGIN_LAT=42.99558828
-ORIGIN_LON=-78.79743755
+# ORIGIN_LAT=42.99558828
+# ORIGIN_LON=-78.79743755
 
-gz_y=$(awk '{print ($1-$2) / 0.0000088}' <<< "$PX4_HOME_LAT $ORIGIN_LAT")
-gz_x=$(awk '{print ($1-$2) / 0.0000122}' <<< "$PX4_HOME_LON $ORIGIN_LON")
+# gz_y=$(awk '{print ($1-$2) / 0.0000088}' <<< "$PX4_HOME_LAT $ORIGIN_LAT")
+# gz_x=$(awk '{print ($1-$2) / 0.0000122}' <<< "$PX4_HOME_LON $ORIGIN_LON")
 
-printf "Spawning SITL in Gazebo:\n\tx = $gz_x\n\ty = $gz_y\n"
+# printf "Spawning SITL in Gazebo:\n\tx = $gz_x\n\ty = $gz_y\n"
 
-export PX4_HOME_ALT=145
+# export PX4_HOME_ALT=145
 
 export soar_geo_path="${HOME}/catkin_ws/src/soar_geofence"
 
@@ -211,7 +211,7 @@ elif [ "$program" == "gazebo" ] && [ ! -n "$no_sim" ]; then
 			echo "Using: ${modelpath}/${model}/${model}.sdf"
 		fi
 
-		while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x $gz_x -y $gz_y -z 0 2>&1 | grep -q "An instance of Gazebo is not running."; do
+		while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x 0 -y 0 -z 0 2>&1 | grep -q "An instance of Gazebo is not running."; do
 			echo "gzserver not ready yet, trying again!"
 			sleep 1
 		done
