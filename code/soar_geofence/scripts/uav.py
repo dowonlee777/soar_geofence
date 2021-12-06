@@ -15,6 +15,7 @@ import rospy
 import math
 import threading
 import enum
+import geofence
 
 HOME_DIRECTORY = os.environ['HOME']
 TELEM_PUB_RATE = 10
@@ -110,12 +111,12 @@ class Uav():
         self.add_user_mav_cmds()
 
         self.run_geofence = False
-        self.geofence = [
-            [42.99559635044619, -78.79735971011293, 181.28],
-            [42.99531277502557, -78.79685522306578, 180.59],
-            [42.99551134918702, -78.79665526993782, 180.9],
-            [42.99579492459777, -78.79715975860931, 181.44]
-        ]
+        self.geofence = geofence.Fence([
+            [42.99559635044619, -78.79735971011293, 20],
+            [42.99531277502557, -78.79685522306578, 20],
+            [42.99551134918702, -78.79665526993782, 20],
+            [42.99579492459777, -78.79715975860931, 20]
+        ])
 
     def add_user_mav_cmds(self):
         self.userMavCmdProto[MAV_CMD.MAV_ARM.value] = self.mav_arm
