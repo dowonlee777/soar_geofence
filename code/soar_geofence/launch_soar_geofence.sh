@@ -1,3 +1,34 @@
+#!/usr/bin/env bash
+
+
+if [ "$#" -gt 2 ]; then
+	echo usage: launch_soar_geofence.sh --lat= --lon=
+	exit 1
+else
+	for i in "$@"; do
+		case $i in 
+			--lat=*)
+			LAT="${i#*=}" # regex sub remove "=" and anything before
+			shift # past argument=value
+			;;
+			--lon=*)
+			LON="${i#*=}"
+			shift
+			;;
+			*)
+			;;
+		esac
+	done
+fi
+
+if [ -n "$LAT" ] && [ -n "$LON" ]; then
+	export PX4_HOME_LAT=$LAT
+	export PX4_HOME_LON=$LON
+else
+	export PX4_HOME_LAT=42.9955301
+	export PX4_HOME_LON=-78.7970664
+fi
+
 PROCESS="ros"
 RESULT=`pgrep ${PROCESS}`
 
