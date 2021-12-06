@@ -11,13 +11,8 @@ set -e
 source "/usr/share/gazebo-11/setup.bash"
 
 if [ "$#" -lt 3 ]; then
-	echo usage: sitl_run.sh model program world
+	echo usage: sitl_run.sh model program world --lat= --lon=
 	exit 1
-fi
-
-if [[ -n "$DONT_RUN" ]]; then
-	echo "Not running simulation (DONT_RUN is set)."
-	exit 0
 fi
 
 sitl_bin="${HOME}/PX4-Autopilot/build/px4_sitl_default/bin/px4"
@@ -28,11 +23,40 @@ world="$3"
 src_path="${HOME}/PX4-Autopilot"
 build_path="${HOME}/PX4-Autopilot/build/px4_sitl_default"
 
-export soar_geo_path="${HOME}/catkin_ws/src/soar_geofence"
+# for i in "$@"; do
+# 	case $i in 
+# 		--lat=*)
+# 		LAT="${i#*=}" # regex sub remove "=" and anything before
+# 		shift # past argument=value
+# 		;;
+# 		--lon=*)
+# 		LON="${i#*=}"
+# 		shift
+# 		;;
+# 		*)
+# 		;;
+# 	esac
+# done
 
-export PX4_HOME_LAT=42.99549724619581
-export PX4_HOME_LON=-78.79709535136203
-export PX4_HOME_ALT=150
+# if [ -n "$LAT" ] && [ -n "$LON" ]; then
+# 	export PX4_HOME_LAT=$LAT
+# 	export PX4_HOME_LON=$LON
+# else
+# 	export PX4_HOME_LAT=42.9955301
+# 	export PX4_HOME_LON=-78.7970664
+# fi
+
+# ORIGIN_LAT=42.99558828
+# ORIGIN_LON=-78.79743755
+
+# gz_y=$(awk '{print ($1-$2) / 0.0000088}' <<< "$PX4_HOME_LAT $ORIGIN_LAT")
+# gz_x=$(awk '{print ($1-$2) / 0.0000122}' <<< "$PX4_HOME_LON $ORIGIN_LON")
+
+# printf "Spawning SITL in Gazebo:\n\tx = $gz_x\n\ty = $gz_y\n"
+
+# export PX4_HOME_ALT=145
+
+export soar_geo_path="${HOME}/catkin_ws/src/soar_geofence"
 
 # The rest of the arguments are files to copy into the working dir.
 
@@ -187,7 +211,7 @@ elif [ "$program" == "gazebo" ] && [ ! -n "$no_sim" ]; then
 			echo "Using: ${modelpath}/${model}/${model}.sdf"
 		fi
 
-		while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x 1.00 -y 0.98 -z 0.83 2>&1 | grep -q "An instance of Gazebo is not running."; do
+		while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x 0 -y 0 -z 0 2>&1 | grep -q "An instance of Gazebo is not running."; do
 			echo "gzserver not ready yet, trying again!"
 			sleep 1
 		done
