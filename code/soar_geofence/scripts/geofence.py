@@ -18,14 +18,14 @@ class Fence():
         '''
         coords: [[lat, lon], ... [lat, lon]]]
         '''
-        self.nodes = self.nodes_map(coords)
+        # self.nodes = self.nodes_map(coords)
         self.edges = self.fence_edges(coords)
 
-    def nodes_map(self, coords):
-        nodes = {}
-        for i in range(0, len(coords)):
-            nodes[i] = coords[i]
-        return nodes
+    # def nodes_map(self, coords):
+    #     nodes = {}
+    #     for i in range(0, len(coords)):
+    #         nodes[i] = coords[i]
+    #     return nodes
 
     def fence_edges(self, coords):
         edges = []
@@ -33,7 +33,7 @@ class Fence():
         for v1 in coords:
             dist = np.array([self.getGPSdistance(v1[0], v1[1], v2[0], v2[1]) for v2 in coords])
             sort = np.argsort(dist)
-            print(v1, sort, dist)
+            # print(v1, sort, dist)
             edges.append([sort[1], sort[2]])
             # edges.append([coords[sort[1]], coords[sort[2]]])
         return edges
@@ -80,14 +80,14 @@ class Fence():
         return
 
 
-if __name__ == "__main__":
-    coords = [
-            [42.99559635044619, -78.79735971011293, 20],
-            [42.99531277502557, -78.79685522306578, 20],
-            [42.99551134918702, -78.79665526993782, 20],
-            [42.99579492459777, -78.79715975860931, 20]
-        ]
-    gf = Fence(coords)
-    print(gf.edges)
-    if gf.getGPSdistance(coords[1][0], coords[1][1], coords[0][0], coords[0][1]) > gf.getGPSdistance(coords[1][0], coords[1][1], coords[3][0], coords[3][1]):
-        print('asdf')
+# if __name__ == "__main__":
+#     coords = [
+#             [42.99559635044619, -78.79735971011293, 20],
+#             [42.99531277502557, -78.79685522306578, 20],
+#             [42.99551134918702, -78.79665526993782, 20],
+#             [42.99579492459777, -78.79715975860931, 20]
+#         ]
+#     gf = Fence(coords)
+#     print(gf.edges)
+#     if gf.getGPSdistance(coords[1][0], coords[1][1], coords[0][0], coords[0][1]) > gf.getGPSdistance(coords[1][0], coords[1][1], coords[3][0], coords[3][1]):
+#         print('asdf')

@@ -11,7 +11,7 @@ set -e
 source "/usr/share/gazebo-11/setup.bash"
 
 if [ "$#" -lt 3 ]; then
-	echo usage: sitl_run.sh model program world --lat= --lon=
+	echo usage: sitl_run.sh model program world --x= --y=
 	exit 1
 fi
 
@@ -23,20 +23,20 @@ world="$3"
 src_path="${HOME}/PX4-Autopilot"
 build_path="${HOME}/PX4-Autopilot/build/px4_sitl_default"
 
-# for i in "$@"; do
-# 	case $i in 
-# 		--lat=*)
-# 		LAT="${i#*=}" # regex sub remove "=" and anything before
-# 		shift # past argument=value
-# 		;;
-# 		--lon=*)
-# 		LON="${i#*=}"
-# 		shift
-# 		;;
-# 		*)
-# 		;;
-# 	esac
-# done
+for i in "$@"; do
+	case $i in 
+		--x=*)
+		x="${i#*=}" # regex sub remove "=" and anything before
+		shift # past argument=value
+		;;
+		--y=*)
+		y="${i#*=}"
+		shift
+		;;
+		*)
+		;;
+	esac
+done
 
 # if [ -n "$LAT" ] && [ -n "$LON" ]; then
 # 	export PX4_HOME_LAT=$LAT
@@ -211,7 +211,7 @@ elif [ "$program" == "gazebo" ] && [ ! -n "$no_sim" ]; then
 			echo "Using: ${modelpath}/${model}/${model}.sdf"
 		fi
 
-		while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x 0 -y 0 -z 0 2>&1 | grep -q "An instance of Gazebo is not running."; do
+		while gz model --verbose --spawn-file="${modelpath}/${model}/${model_name}.sdf" --model-name=${model} -x $x -y $y -z 0 2>&1 | grep -q "An instance of Gazebo is not running."; do
 			echo "gzserver not ready yet, trying again!"
 			sleep 1
 		done
