@@ -2,17 +2,17 @@
 
 
 if [ "$#" -gt 2 ]; then
-	echo usage: launch_soar_geofence.sh --lat= --lon=
+	echo usage: launch_soar_geofence.sh --x= --y=
 	exit 1
 else
 	for i in "$@"; do
 		case $i in 
-			--lat=*)
-			LAT="${i#*=}" # regex sub remove "=" and anything before
+			--x=*)
+			x="${i#*=}" # regex sub remove "=" and anything before
 			shift # past argument=value
 			;;
-			--lon=*)
-			LON="${i#*=}"
+			--y=*)
+			y="${i#*=}"
 			shift
 			;;
 			*)
@@ -62,7 +62,7 @@ fi
 
 # https://stackoverflow.com/questions/3512055/avoid-gnome-terminal-close-after-script-execution
 START_ROS="roscore"
-SCRIPT1="./sitl_run.sh iris gazebo SOAR_World"
+SCRIPT1="./sitl_run.sh iris gazebo SOAR_World --x=$x --y=$y"
 SCRIPT2="rosrun soar_geofence uav.py"
 SCRIPT3="rosrun soar_geofence joystick.py"
 

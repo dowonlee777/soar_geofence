@@ -256,7 +256,7 @@ class Uav():
             if not self.run_geofence:
                 break
             if self.setpoint.vz > 0:
-                if self.telem.altAGL < 1:
+                if self.telem.altAGL < 2:
                     self.setpoint.vz = 0
 
             if self.setpoint.vz < 0:
