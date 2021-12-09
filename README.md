@@ -72,17 +72,7 @@ cd ~/catkin_ws/src/soar_geofence
 ./launch_soar_geofence.sh
 ```
 
---- 
-
-## IMPORTANT DATES:
-- **Thursday, Nov. 4** -- Proposal presentations in class.
-- **Tuesday, Nov. 23** -- Progress Report.  Each team will present the status of their project via Zoom that day, using the [PROPOSAL.md](PROPOSAL.md) template.  
-- **Thursday, Dec. 9** -- Your **almost** final documentation, code, and presentation materials are due.  You'll be asked to give a brief presentation in class.  I'll give you feedback.
-- **Exact Date to-be-determined** -- **Final** project presentations.  We'll either do these in class, or you'll produce a YouTube video.  We'll discuss in early December.
-- **Wednesday, Dec. 15, Noon** -- Your complete project materials are due.
-
-
----
+--------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Organizing your Repository
 For consistency, please use the directory structure described below, where `projectname` should be replaced with the actual catkin_ws name of your project.
@@ -128,4 +118,4 @@ Grades for the final project will be based on the following percentages and cont
 	- Are the installation instructions complete?
 	- Are the instructions for running the code complete?
 	- Were you able to answer technical questions about your project?
-	- How well were you able to demonstrate the actual implementation?  Note: You have until Friday, Dec. 13 to finalize the project.
+	- How well were you able to demonstrate the actual implementation?
