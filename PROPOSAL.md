@@ -32,46 +32,46 @@ First we'll build the Gazebo world of SOAR. Then we will get the PX4 SITL to run
 {What are the tasks that you need to complete?  Who is going to do them?  When will they be completed?}
 - [x] Complete this proposal document.  *Due Nov. 2*
 - [x] Research into suspected future problems or topics not covered in class 
-- [ ] Custom SOAR Gazebo Model, DC
-  - [ ] Create Main Poles x13
-    - [ ] Correct Color, Location, & Size
-  - [ ] Lights x2
-    - [ ] Using Pole #10: 1 as the origin of the model, with everything built off this dimension wise
-  - [ ] Generate materials folder for asphault ground 
+- [x] Custom SOAR Gazebo Model
+  - [x] Create Main Poles x13
+    - [x] Correct Color, Location, & Size
+  - [x] Lights x2
+    - [x] Using Pole #10: 1 as the origin of the model, with everything built off this dimension wise
+  - [ ] Generate materials folder for asphault ground
+    - [ ] decided against this, as the asphault made the drone too hard to see   
   - [ ] Find suitable replacement for enclosement mesh/ wire 
-  - [ ] If it makes sense also add the three grass mounds
 - [ ] Setting up Gazebo Sim and PX4 SITL
     - [x] Installation of PX4-Autopilot and mavsdk-Python. See README.md
-    - [ ] Write separate shell script from PX4's `sitl_run.sh` (tailored to our needs) to launch Gazebo and PX4 SITL.
+    - [x] Write separate shell script from PX4's `sitl_run.sh` (tailored to our needs) to launch Gazebo and PX4 SITL.
 - [ ] `Uav.py` node
     - [ ] Connect to running PX4 SITL
-    - [ ] Takeoff, land
+    - [x] Takeoff, land
     - [ ] Create `telemetry` thread and publish to `telem` topic
     - [ ] Implement Offboard Mode
         - [ ] Implement offboard functions in response to `joystick.py` node.
         - [ ] Implement overriding of offboard functions in response to `geofence_monitor.py` node.
-- [ ] `joystick.py` node
-    - [ ] Borrow code from `optimatorlab/m3c_wg`
-    - [ ] Refine mappings if necessary and publish to `mav_cmd` topic
+- [x] `joystick.py` node
+    - [x] Borrow code from `optimatorlab/m3c_wg`
+    - [x] Refine mappings if necessary and publish to `mav_cmd` topic
+    - [x] Check Bluetooth Connections 
 - [ ] `geofence_monitor.py` node
     - [ ] Identify if the drone flight and given `mav_cmd` will cause it to exceed the geofence
     - [ ] Send the overriding `mav_cmds` if necessary to make drone slide across geofence, or prevent altitude (rise/sink)
 
-- [ ] Create progress report.  *Due Nov. 20*
-- [ ] Necessary changes found due to errors arised during progress update 
-- [ ] Create final presentation.  *Due Dec. 4*
-- [ ] Provide system documentation (README.md).  *Due Dec. 14*
+- [x] Create progress report.  *Due Nov. 20*
+- [x] Necessary changes found due to errors arised during progress update 
+- [x] Create final presentation.  *Due Dec. 15*
+- [x] Provide system documentation (README.md).  *Due Dec. 15*
 
 
+------------------------------------------------------------------------------------------------------------------------------------------------------------------
 ## Measures of Success
 {How will you know you succeeded?  If you were to receive partial credit, what should we look for?}
 - Working Custom Gazebo Model
 - Ability to launch PX4 drone in model and move around freely 
 - Demonstrate our geofence code from a multitude of different entrances 
 
-
-
-- [ ] Gazebo World of SOAR is relatively accurate
-- [ ] SITL drone flies given joystick commands
+- [x] Gazebo World of SOAR is relatively accurate
+- [x] SITL drone flies given joystick commands
 - [ ] SITL drone stops near geofence
 - [ ] SITL drone moves along geofence based on angle of approach
