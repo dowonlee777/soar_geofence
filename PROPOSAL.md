@@ -36,15 +36,13 @@ First we'll build the Gazebo world of SOAR. Then we will get the PX4 SITL to run
   - [x] Create Main Poles x13
     - [x] Correct Color, Location, & Size
   - [x] Lights x2
-    - [x] Using Pole #10: 1 as the origin of the model, with everything built off this dimension wise
-  - [ ] Generate materials folder for asphault ground
-    - [ ] decided against this, as the asphault made the drone too hard to see   
+    - [x] Using Pole #10: 1 as the origin of the model, with everything built off this dimension wise 
   - [ ] Find suitable replacement for enclosement mesh/ wire 
-- [ ] Setting up Gazebo Sim and PX4 SITL
+- [x] Setting up Gazebo Sim and PX4 SITL
     - [x] Installation of PX4-Autopilot and mavsdk-Python. See README.md
     - [x] Write separate shell script from PX4's `sitl_run.sh` (tailored to our needs) to launch Gazebo and PX4 SITL.
 - [ ] `Uav.py` node
-    - [ ] Connect to running PX4 SITL
+    - [x] Connect to running PX4 SITL
     - [x] Takeoff, land
     - [ ] Create `telemetry` thread and publish to `telem` topic
     - [ ] Implement Offboard Mode
