@@ -12,34 +12,79 @@
 import math
 import numpy as np
 import geopy.distance
+import veroviz as vrv
 
-class Fence():
-    def __init__(self, coords):
+class Geofence():
+    def __init__(self, nodes, maxAGL=20, minAGL=5, closeToFenceDist=2, takeOverDist=1, cornerDist=1):
         '''
-        coords: [[lat, lon], ... [lat, lon]]]
+        coords: [
+                    [[lat, lon], [lat, lon]],
+                    ...
+                ]
         '''
-        # self.nodes = self.nodes_map(coords)
-        self.edges = self.fence_edges(coords)
+        self.nodes = nodes
+        self.fences = self.init_fence(nodes)
+        self.max_alt = maxAGL
+        self.min_alt = minAGL
+        self.closeToFenceDist = closeToFenceDist
+        self.takeOverDist = takeOverDist
+        self.cornerDist = cornerDist
 
-    # def nodes_map(self, coords):
-    #     nodes = {}
-    #     for i in range(0, len(coords)):
-    #         nodes[i] = coords[i]
-    #     return nodes
+    def init_fence(self, nodes):
+            
+        fences = []
+        fences.append(Fence([nodes[-1], nodes[0]], vrv.getHeading(nodes[-1], nodes[0]), id=0))
+        for i in range(0, len(nodes)-1):
+            heading = vrv.getHeading(nodes[i], nodes[i+1])
+            fences.append(Fence([nodes[i], nodes[i+1]], heading, id=i+1))
 
-    def fence_edges(self, coords):
-        edges = []
+        return fences
+    
+    def monitor(self, lat, lon, altAGL, vx, vy, vz, heading):
+        # if self.isInFence(lat, lon):
+        sorted_dist_fence = self.dist_to_fences(lat, lon)
+        if sorted_dist_fence[0][0] < self.closeToFenceDist:
+            fence = sorted_dist_fence[0][1]
+            safe_angles = fence.adjust_safe_headings(heading)
+            if vx != 0 or vy != 0:
+                intoFence, vel_angle = fence.is_vel_into_fence(fence.vels_heading(vx, vy, heading), safe_angles)
+            
+                if intoFence:
+                    print('Going into fence %d | Velocity Heading: %d | Safe Angles: %s' % (fence.id, vel_angle, fence.safe_headings) )
+                    vx *= 0.7
+                    vy *= 0.7
+                    if sorted_dist_fence[0][0] < self.cornerDist and sorted_dist_fence[1][0] < self.cornerDist:
+                        # corner ?
+                        vx = 0
+                        vy = 0
 
-        for v1 in coords:
-            dist = np.array([self.getGPSdistance(v1[0], v1[1], v2[0], v2[1]) for v2 in coords])
-            sort = np.argsort(dist)
-            # print(v1, sort, dist)
-            edges.append([sort[1], sort[2]])
-            # edges.append([coords[sort[1]], coords[sort[2]]])
-        return edges
+                    elif sorted_dist_fence[0][0] < self.takeOverDist:
 
+                        vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
+                        
+                        magnitude = math.sqrt(vx**2 + vy**2)
+                        vx = vx_unit * magnitude
+                        vy = vy_unit * magnitude
+                        print('Goal Heading: %s | Velocity Heading: %f' % (fence.safe_headings, fence.vels_heading(vx, vy, heading)))
+                        # print('vx: %f | vy: %f | vel_heading: %f' % (vx, vy, vel_angle))
+                        print(vel_angle, vx, vy)
 
-    # Borrowed from soar_rover
+        if vz > 0:
+            if altAGL < self.min_alt:
+                vz = 0
+
+        if vz < 0:
+            if altAGL > self.max_alt:
+                vz = 0
+
+        # else:
+        #     print('WARNING: Outside geofence')
+        
+        return vx, vy, vz
+
+    def isInFence(self, lat, lon):
+        return vrv.isPointInPoly(loc=[lat, lon], poly=self.nodes)
+
     def getGPSdistance(self, lat1deg, lon1deg, lat2deg, lon2deg):
         """
         Distance between two locations in 2D
@@ -60,7 +105,7 @@ class Fence():
 
         return distMeters
 
-    def getHeading(latCurDeg, lonCurDeg, latGoalDeg, lonGoalDeg):
+    def getHeading(self, latCurDeg, lonCurDeg, latGoalDeg, lonGoalDeg):
         # NOTE:  The lat/lon values in the formulas below are in units of ***[radians]***
         
         latCurRad = latCurDeg*(math.pi/180.0)
@@ -76,18 +121,156 @@ class Fence():
                 
         return (headingRad*(180/math.pi))
 
-    def distance2fence(self, lat, lon):
-        return
+    def dist_to_fences(self, latCur, lonCur):
+        dist_fence = []
+        for fence in self.fences:
+            pos, dist = vrv.closestPointLoc2Path(loc=[latCur, lonCur], path=fence.coords)
+            dist = self.getGPSdistance(latCur, lonCur, pos[0], pos[1])
+            dist_fence.append([dist, fence])
+            # if dist < 3:
+            #     return True, fence, dist
 
+        return sorted(dist_fence, key = lambda x: x[0])
 
-# if __name__ == "__main__":
-#     coords = [
-#             [42.99559635044619, -78.79735971011293, 20],
-#             [42.99531277502557, -78.79685522306578, 20],
-#             [42.99551134918702, -78.79665526993782, 20],
-#             [42.99579492459777, -78.79715975860931, 20]
-#         ]
-#     gf = Fence(coords)
-#     print(gf.edges)
-#     if gf.getGPSdistance(coords[1][0], coords[1][1], coords[0][0], coords[0][1]) > gf.getGPSdistance(coords[1][0], coords[1][1], coords[3][0], coords[3][1]):
-#         print('asdf')
+        # return False, None, None
+
+class Fence():
+    def __init__(self, coords, heading, id=None):
+        self.coords = coords
+        self.heading = heading
+        self.id = id
+        if heading >= 180:
+            a2 = heading - 180
+            # self.safe_headings = (a2, heading)
+        else:
+            a2 = heading + 180
+        
+        self.safe_headings = (a2, heading)
+    
+
+    def adjust_safe_headings(self, headCur):
+        # 
+        safe = list(self.safe_headings)
+
+        if headCur >= 180:
+            # rotation is CCW from north
+            safe[0] += 360-headCur
+            safe[1] += 360-headCur
+            if safe[0] > 360:
+                safe[0] -= 360
+            if safe[1] > 360:
+                safe[1] -= 360
+
+            # if safe[0] > safe[1]:
+            #     # switch
+            #     temp = safe[1]
+            #     safe[1] = safe[0]
+            #     safe[0] = temp
+        else:
+            # rotation is CW from north
+            safe[0] -= headCur
+            safe[1] -= headCur
+            if safe[0] < 0:
+                safe[0] += 360
+            if safe[1] < 0:
+                safe[1] += 360
+
+            # if safe[0] > safe[1]:
+            #     temp = safe[1]
+            #     safe[1] = safe[0]
+            #     safe[0] = temp        
+            
+        return safe
+
+    def is_vel_into_fence(self, vel_angle, safe_angles):
+        # print(vel_angle)
+        if self.safe_headings[0] < self.safe_headings[1]:
+            if vel_angle > self.safe_headings[0] and vel_angle < self.safe_headings[1]:
+                return False, None
+        elif self.safe_headings[0] > self.safe_headings[1]:
+            if vel_angle > self.safe_headings[0] or vel_angle < self.safe_headings[1]:
+                return False, None
+            
+        return True, vel_angle
+    
+    def vels_heading(self, vx, vy, heading):
+        angle = heading
+        if vx != 0:
+            theta = math.atan(vy/vx) * (180/math.pi)
+            if vy > 0 and vx > 0:
+                # positive theta
+                angle = heading + theta
+            elif vy > 0 and vx < 0:
+                # negative theta
+                angle = heading + theta - 180
+            elif vy < 0 and vx > 0:
+                # negative theta
+                angle = heading + theta
+            elif vy < 0 and vx < 0:
+                # positive theta
+                angle = heading + theta + 180
+        elif vy > 0:
+            angle = 90 + heading
+        elif vy < 0:
+            angle = heading - 90
+
+        angle = self.validate_heading(angle)
+        
+        return angle
+    
+    def slide_fence_vels(self, vel_angle, safe_angles):
+
+        theta1 =  vel_angle - self.safe_headings[0]
+        theta2 = vel_angle - self.safe_headings[1]
+
+        if theta1 < 0:
+            theta1 = theta1 + 360
+        if theta2 < 0:
+            theta2 = theta2 + 360
+    
+        if theta1 < theta2:
+            print(vel_angle, safe_angles[0])
+            return self.vels_along_fence_relative(safe_angles[0])
+        else:
+            print(vel_angle, safe_angles[1])
+            return self.vels_along_fence_relative(safe_angles[1])
+    
+    def vels_along_fence_relative(self, goal_angle):
+        if goal_angle <= 90:
+            vx = math.cos(goal_angle * (math.pi/180))
+            vy = math.sin(goal_angle * (math.pi/180))
+        elif goal_angle <= 180:
+            vx = -math.cos( (180-goal_angle) * (math.pi/180))
+            vy = math.sin( (180-goal_angle) * (math.pi/180))
+        elif goal_angle <= 270:
+            vx = -math.cos( (270-goal_angle) * (math.pi/180))
+            vy = -math.sin( (270-goal_angle) * (math.pi/180))
+        elif goal_angle <= 360:
+            vx = math.cos( (360-goal_angle) * (math.pi/180))
+            vy = -math.sin( (360-goal_angle) * (math.pi/180))
+    
+
+        return vx, vy
+
+    def validate_heading(self, a):
+        if a > 360:
+            return a - 360
+        elif a < 0:
+            return a + 360
+        else:
+            return a
+
+if __name__ == "__main__":
+
+    nodes = [[42.99559635044619, -78.79735971011293, 181.28],
+                [42.99531277502557, -78.79685522306578, 180.59],
+                [42.99551134918702, -78.79665526993782, 180.9],
+                [42.99579492459777, -78.79715975860931, 181.44]
+            ]
+        
+    gf = Geofence(nodes, maxAGL=22, minAGL=2)
+
+    [print(fence.safe_headings) for fence in gf.fences]
+    fence = gf.fences[0]
+    print(fence.safe_headings, fence.is_vel_into_fence(310, (0, 0)))
+    print(gf.getHeading(42.99559635044619, -78.79735971011293, 42.99579492459777, -78.79715975860931))

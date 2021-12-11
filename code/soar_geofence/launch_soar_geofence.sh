@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 
 
-if [ "$#" -gt 2 ]; then
-	echo usage: launch_soar_geofence.sh --x= --y=
+if [ "$#" -gt 3 ]; then
+	echo usage: launch_soar_geofence.sh --x= --y= --geofence=
 	exit 1
 else
+	geofence=""
 	for i in "$@"; do
 		case $i in 
 			--x=*)
@@ -13,6 +14,10 @@ else
 			;;
 			--y=*)
 			y="${i#*=}"
+			shift
+			;;
+			--geofence=*)
+			geofence="${i#*=}"
 			shift
 			;;
 			*)
@@ -63,7 +68,7 @@ fi
 # https://stackoverflow.com/questions/3512055/avoid-gnome-terminal-close-after-script-execution
 START_ROS="roscore"
 SCRIPT1="./sitl_run.sh iris gazebo SOAR_World --x=$x --y=$y"
-SCRIPT2="rosrun soar_geofence uav.py"
+SCRIPT2="rosrun soar_geofence uav.py --geofence $geofence"
 SCRIPT3="rosrun soar_geofence joystick.py"
 
 gnome-terminal --tab --title "ROS" -e "bash -ic \"export HISTFILE=${HOME}/.bash_history_junk1; $START_ROS; history -s $START_ROS; exec bash\"" 

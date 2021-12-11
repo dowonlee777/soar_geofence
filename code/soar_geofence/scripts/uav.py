@@ -15,11 +15,15 @@ import rospy
 import math
 import threading
 import enum
-import geofence
+from geofence import Geofence
+import argparse
+import json
+import numpy as np
+import veroviz as vrv
 
 HOME_DIRECTORY = os.environ['HOME']
 TELEM_PUB_RATE = 10
-SETPOINT_RATE = 2
+SETPOINT_RATE = 5
 
 class MAV_CMD(enum.Enum):
     MAV_NONE                  = -1
@@ -110,13 +114,13 @@ class Uav():
         self.armed = False
         self.add_user_mav_cmds()
 
-        self.run_geofence = False
-        self.geofence = geofence.Fence([
-            [42.99559635044619, -78.79735971011293, 20],
-            [42.99531277502557, -78.79685522306578, 20],
-            [42.99551134918702, -78.79665526993782, 20],
-            [42.99579492459777, -78.79715975860931, 20]
-        ])
+        self.geofence_on = False
+        # self.geofence = Geofence([
+        #     [[42.99559635044619, -78.79735971011293, 20], [42.99579492459777, -78.79715975860931, 20]],
+        #     [[42.99531277502557, -78.79685522306578, 20], [42.99559635044619, -78.79735971011293, 20]],
+        #     [[42.99551134918702, -78.79665526993782, 20], [42.99531277502557, -78.79685522306578, 20]],
+        #     [[42.99579492459777, -78.79715975860931, 20], [42.99551134918702, -78.79665526993782, 20]]
+        # ])
 
     def add_user_mav_cmds(self):
         self.userMavCmdProto[MAV_CMD.MAV_ARM.value] = self.mav_arm
@@ -174,7 +178,18 @@ class Uav():
         # Subscribe to teleop commands -- vx/vy/vz/yaw
         rospy.Subscriber("vxyz_yaw_cmd", vxyz_yaw_cmd, self.callback_vxyz_yaw_cmd)
         
-
+    def load_geofence(self, fence_data):
+        file = HOME_DIRECTORY + '/catkin_ws/src/soar_geofence/geofences/' + fence_data + '.json'
+        data = json.load(open(file))
+        geofence = data['geofence']
+        coordinates = geofence['poly']
+        
+        self.geofence = Geofence(coordinates, geofence['ceilingMetersAGL'], 
+                                    minAGL= geofence['minAGL'],
+                                    closeToFenceDist = geofence['closeToFenceDist'],
+                                    takeOverDist = geofence['takeOverDist'],
+                                    cornerDist = geofence['cornerDist']
+                                )
 
     async def running(self):
         print('Vehicle ready.')
@@ -253,18 +268,90 @@ class Uav():
     def monitor_geofence(self, rate):
         sleepRate = rospy.Rate(rate)
         while True:
-            if not self.run_geofence:
+            if self.flight_mode.name != FlightMode.OFFBOARD.name:
+                self.offboard_starting = False
+                print('Geofence activity paused.')
                 break
-            if self.setpoint.vz > 0:
-                if self.telem.altAGL < 2:
-                    self.setpoint.vz = 0
-
-            if self.setpoint.vz < 0:
-                if self.telem.altAGL > 20:
-                    self.setpoint.vz = 0
             
+            self.setpoint.vx, self.setpoint.vy, self.setpoint.vz = self.geofence.monitor(
+                                                                        lat=self.telem.lat,
+                                                                        lon=self.telem.lon,
+                                                                        altAGL=self.telem.altAGL,
+                                                                        vx=self.setpoint.vx,
+                                                                        vy=self.setpoint.vy,
+                                                                        vz=self.setpoint.vz,
+                                                                        heading=self.telem.heading
+                                                                    )
+            # if self.geofence.isInFence(lat, lon):
+            #     sorted_dist_fence = self.geofence.dist_to_fences(lat, lon)
+            #     print(sorted_dist_fence)
+            #     if sorted_dist_fence[0][0] < self.geofence.closeToFenceDist:
+            #         fence = self.geofence.fences[sorted_dist_fence[0][1]]
+            #         safe_angles = fence.adjust_safe_headings(self.telem.heading)
+            #         intoFence, vel_angle = fence.is_vel_into_fence(self.setpoint.vx, self.setpoint.vy, self.telem.heading, safe_angles)
+                    
+            #         if intoFence:
+            #             print('Close to fence %d | Velocity Heading: %d' % (fence.id, vel_angle) )
+            #             self.setpoint.vx *= 0.5
+            #             self.setpoint.vy *= 0.5
+            #             if sorted_dist_fence[0][0] < self.geofence.cornerDist and sorted_dist_fence[1][0] < self.geofence.cornerDist:
+            #                 # corner ?
+            #                 self.setpoint.vx = 0
+            #                 self.setpoint.vy = 0
+
+            #             elif sorted_dist_fence[0][0] < self.geofence.takeOverDist:
+
+            #                 vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
+            #                 magnitude = math.sqrt(self.setpoint.vx**2 + self.setpoint.vy**2)
+            #                 self.setpoint.vx = vx_unit * magnitude
+            #                 self.setpoint.vy = vy_unit * magnitude
+            #                 print(vel_angle, self.setpoint.vx, self.setpoint.vy)
+
+            #     if self.setpoint.vz > 0:
+            #         if self.telem.altAGL < self.geofence.min_alt:
+            #             self.setpoint.vz = 0
+
+            #     if self.setpoint.vz < 0:
+            #         if self.telem.altAGL > self.geofence.max_alt:
+            #             self.setpoint.vz = 0
+
+            # else:
+            #     print('WARNING: Outside geofence')
 
             sleepRate.sleep()
+    
+    # async def geofence_check_setpoint(self):
+    #     lat = self.telem.lat
+    #     lon = self.telem.lon
+    #     heading = self.telem.heading
+    #     close, fence, dist = self.geofence.close_to_fence(lat, lon, self.telem.heading)
+
+    #     if close:
+    #         safe_angles = fence.adjust_safe_headings(self.telem.heading)
+    #         # print('Close to fence %d | Safe Heading %s' % (fence.id, safe_headings))
+    #         intoFence, vel_angle = fence.is_vel_into_fence(self.setpoint.vx, self.setpoint.vy, self.telem.heading, safe_angles)
+    #         if intoFence:
+    #             if dist > 2:
+    #                 print('slowing down')
+    #                 self.setpoint.vx *= 0.5
+    #                 self.setpoint.vx *= 0.5
+    #             else:
+    #                 # print(safe_angles)
+    #                 # self.setpoint.vx = 0
+    #                 # self.setpoint.vy = 0
+    #                 vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
+    #                 magnitude = math.sqrt(self.setpoint.vx**2 + self.setpoint.vy**2)
+    #                 self.setpoint.vx = vx_unit * magnitude
+    #                 self.setpoint.vy = vy_unit * magnitude
+    #                 print(vel_angle, magnitude, self.setpoint.vx, self.setpoint.vy)
+
+    #     if self.setpoint.vz > 0:
+    #         if self.telem.altAGL < 2:
+    #             self.setpoint.vz = 0
+
+    #     if self.setpoint.vz < 0:
+    #         if self.telem.altAGL > 20:
+    #             self.setpoint.vz = 0
 
     # ============================================================================================= #
     #                                         END ROS Functions                                     #
@@ -369,7 +456,7 @@ class Uav():
             await asyncio.sleep(1)
             print('Offboard Ready.')
 
-            self.run_geofence = True
+            self.geofence_on = True
             geofenceThread = threading.Thread(target=self.monitor_geofence, args=(2,))
             geofenceThread.start()
             
@@ -386,6 +473,16 @@ class Uav():
 
     async def setpoint_stream(self, rate):
         while self.flight_mode.name == FlightMode.OFFBOARD.name:
+            # await self.geofence_check_setpoint()
+            self.setpoint.vx, self.setpoint.vy, self.setpoint.vz = self.geofence.monitor(
+                                                            lat=self.telem.lat,
+                                                            lon=self.telem.lon,
+                                                            altAGL=self.telem.altAGL,
+                                                            vx=self.setpoint.vx,
+                                                            vy=self.setpoint.vy,
+                                                            vz=self.setpoint.vz,
+                                                            heading=self.telem.heading
+                                                        )
             yield self.setpoint
             await asyncio.sleep(1/rate)
 
@@ -480,7 +577,7 @@ class Uav():
     async def shutdown(self, sig):
         print(sig)
         self.publishTelem = False
-        self.run_geofence = False
+        self.geofence_on = False
 
         print('Cancelling Asyncio Tasks...')
         tasks = [t for t in asyncio.all_tasks() if t.get_name() != 'shutdown' and t.get_name() != 'main']
@@ -500,9 +597,18 @@ class Uav():
 
 
 if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument('--geofence', required=False, type=str)
+
+    args = vars(ap.parse_args())
+
     loop = asyncio.get_event_loop()
     
     uav = Uav(loop)
+    if args['geofence']:
+        uav.load_geofence(args['geofence'])
+    else:
+        uav.load_geofence('default')
 
     # https://www.roguelynn.com/words/asyncio-graceful-shutdowns/
     signals = (signal.SIGINT, signal.SIGTERM)

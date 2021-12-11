@@ -1,0 +1,34 @@
+{
+	"polesArray" : [
+		{"id":0,  "lat": 42.99525466, "lon": -78.79684403, "elevMSLmeters": 180.43, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.579}, 
+		{"id":1,  "lat": 42.99534179, "lon": -78.79675314, "elevMSLmeters": 180.61, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.570}, 
+		{"id":2,  "lat": 42.99542893, "lon": -78.79666224, "elevMSLmeters": 180.69, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.565}, 
+		{"id":3,  "lat": 42.99551606, "lon": -78.79657134, "elevMSLmeters": 180.86, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.560}, 
+		{"id":4,  "lat": 42.99559946, "lon": -78.79671971, "elevMSLmeters": 181.16, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.547}, 
+		{"id":5,  "lat": 42.99568287, "lon": -78.79686809, "elevMSLmeters": 181.33, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.533}, 
+		{"id":6,  "lat": 42.99576627, "lon": -78.79701647, "elevMSLmeters": 181.45, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.520}, 
+		{"id":7,  "lat": 42.99584968, "lon": -78.79716485, "elevMSLmeters": 181.55, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.507}, 
+		{"id":8,  "lat": 42.99576254, "lon": -78.79725575, "elevMSLmeters": 181.44, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.512}, 
+		{"id":9,  "lat": 42.99567541, "lon": -78.79734665, "elevMSLmeters": 181.39, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.517}, 
+		{"id":10, "lat": 42.99558828, "lon": -78.79743755, "elevMSLmeters": 181.36, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.522}, 
+		{"id":11, "lat": 42.99550487, "lon": -78.79728917, "elevMSLmeters": 181.10, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.535}, 
+		{"id":12, "lat": 42.99542147, "lon": -78.79714079, "elevMSLmeters": 180.91, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.549}, 
+		{"id":13, "lat": 42.99533806, "lon": -78.79699241, "elevMSLmeters": 180.62, "heightMeters": 25.908, "elevMSLcesiumMeters": 146.562}
+	],
+    "lightsArray": [
+        {"id": 0, "lat": 42.995436, "lon": -78.796742, "elevMeters": 180.74, "radius": 2, "heightMeters": 10.3},
+        {"id": 1, "lat": 42.995642, "lon": -78.797116, "elevMeters": 181.13, "radius": 2, "heightMeters": 10.3}
+    ],
+    "curbsArray": [
+        {"id": 0, "poly": [[42.995451, -78.796640, 180.69], [42.995481, -78.796610, 180.90], [42.995548, -78.796718, 180.95], [42.995514, -78.796751, 180.95]]},
+        {"id": 1, "poly": [[42.995555, -78.796820, 180.95], [42.995595, -78.796782, 181.16], [42.995658, -78.796893, 181.33], [42.995618, -78.796933, 181.14]]},
+        {"id": 2, "poly": [[42.995662, -78.797004, 181.29], [42.995689, -78.796979, 181.29], [42.995754, -78.797083, 181.45], [42.995723, -78.797114, 181.27]]}
+    ],
+    "geofence": {
+        "poly": [[42.99559635044619, -78.79735971011293, 181.28],
+            [42.99531277502557, -78.79685522306578, 180.59],
+            [42.99551134918702, -78.79665526993782, 180.9],
+            [42.99579492459777, -78.79715975860931, 181.44]],
+        "ceilingMetersAGL": 22
+    }
+}
