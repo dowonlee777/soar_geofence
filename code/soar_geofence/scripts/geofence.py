@@ -43,29 +43,37 @@ class Geofence():
     def monitor(self, lat, lon, altAGL, vx, vy, vz, heading):
         # if self.isInFence(lat, lon):
         sorted_dist_fence = self.dist_to_fences(lat, lon)
-        if sorted_dist_fence[0][0] < self.closeToFenceDist:
-            fence = sorted_dist_fence[0][1]
-            safe_angles = fence.adjust_safe_headings(heading)
-            if vx != 0 or vy != 0:
-                intoFence, vel_angle = fence.is_vel_into_fence(fence.vels_heading(vx, vy, heading), safe_angles)
             
+        if sorted_dist_fence[0][0] < self.closeToFenceDist:
+            fence_1 = sorted_dist_fence[0][1]
+            safe_angles_1 = fence_1.adjust_safe_headings(heading)
+            intoFence, vel_angle = fence_1.is_vel_into_fence(fence_1.vels_heading(vx, vy, heading), safe_angles_1)
+
+            if sorted_dist_fence[1][0] < self.closeToFenceDist:
+                # corner, acceptable velocities should be away from both fences
+                fence_2 = sorted_dist_fence[1][1]
+                safe_angles_2 = fence_2.adjust_safe_headings(heading)
+                intoFence_2, vel_angle_2 = fence_2.is_vel_into_fence(fence_2.vels_heading(vx, vy, heading), safe_angles_2)
+
+                if intoFence or intoFence_2:
+                    print('In corner')
+                    vx = 0
+                    vy = 0
+
+            else:
                 if intoFence:
-                    print('Going into fence %d | Velocity Heading: %d | Safe Angles: %s' % (fence.id, vel_angle, fence.safe_headings) )
-                    vx *= 0.7
-                    vy *= 0.7
-                    if sorted_dist_fence[0][0] < self.cornerDist and sorted_dist_fence[1][0] < self.cornerDist:
-                        # corner ?
-                        vx = 0
-                        vy = 0
+                    print('Going into fence %d | Velocity Heading: %d | Safe Angles: %s' % (fence_1.id, vel_angle, fence_1.safe_headings) )
+                    vx *= 0.8
+                    vy *= 0.8
 
-                    elif sorted_dist_fence[0][0] < self.takeOverDist:
+                    if sorted_dist_fence[0][0] < self.takeOverDist:
 
-                        vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
+                        vx_unit, vy_unit = fence_1.slide_fence_vels(vel_angle, safe_angles_1)
                         
                         magnitude = math.sqrt(vx**2 + vy**2)
                         vx = vx_unit * magnitude
                         vy = vy_unit * magnitude
-                        print('Goal Heading: %s | Velocity Heading: %f' % (fence.safe_headings, fence.vels_heading(vx, vy, heading)))
+                        print('Goal Heading: %s | Velocity Heading: %f' % (fence_1.safe_headings, fence_1.vels_heading(vx, vy, heading)))
                         # print('vx: %f | vy: %f | vel_heading: %f' % (vx, vy, vel_angle))
                         print(vel_angle, vx, vy)
 
@@ -184,39 +192,45 @@ class Fence():
 
     def is_vel_into_fence(self, vel_angle, safe_angles):
         # print(vel_angle)
-        if self.safe_headings[0] < self.safe_headings[1]:
-            if vel_angle > self.safe_headings[0] and vel_angle < self.safe_headings[1]:
-                return False, None
-        elif self.safe_headings[0] > self.safe_headings[1]:
-            if vel_angle > self.safe_headings[0] or vel_angle < self.safe_headings[1]:
-                return False, None
-            
-        return True, vel_angle
+        if vel_angle is not None:
+            if self.safe_headings[0] < self.safe_headings[1]:
+                if vel_angle > self.safe_headings[0] and vel_angle < self.safe_headings[1]:
+                    return False, None
+            elif self.safe_headings[0] > self.safe_headings[1]:
+                if vel_angle > self.safe_headings[0] or vel_angle < self.safe_headings[1]:
+                    return False, None
+                
+            return True, vel_angle
+        else:
+            return False, vel_angle
     
     def vels_heading(self, vx, vy, heading):
-        angle = heading
-        if vx != 0:
-            theta = math.atan(vy/vx) * (180/math.pi)
-            if vy > 0 and vx > 0:
-                # positive theta
-                angle = heading + theta
-            elif vy > 0 and vx < 0:
-                # negative theta
-                angle = heading + theta - 180
-            elif vy < 0 and vx > 0:
-                # negative theta
-                angle = heading + theta
-            elif vy < 0 and vx < 0:
-                # positive theta
-                angle = heading + theta + 180
-        elif vy > 0:
-            angle = 90 + heading
-        elif vy < 0:
-            angle = heading - 90
+        if vx != 0 or vy != 0:
+            angle = heading
+            if vx != 0:
+                theta = math.atan(vy/vx) * (180/math.pi)
+                if vy > 0 and vx > 0:
+                    # positive theta
+                    angle = heading + theta
+                elif vy > 0 and vx < 0:
+                    # negative theta
+                    angle = heading + theta - 180
+                elif vy < 0 and vx > 0:
+                    # negative theta
+                    angle = heading + theta
+                elif vy < 0 and vx < 0:
+                    # positive theta
+                    angle = heading + theta + 180
+            elif vy > 0:
+                angle = 90 + heading
+            elif vy < 0:
+                angle = heading - 90
 
-        angle = self.validate_heading(angle)
+            angle = self.validate_heading(angle)
         
-        return angle
+            return angle
+        else:
+            return None
     
     def slide_fence_vels(self, vel_angle, safe_angles):
 
@@ -224,9 +238,9 @@ class Fence():
         theta2 = vel_angle - self.safe_headings[1]
 
         if theta1 < 0:
-            theta1 = theta1 + 360
+            theta1 = 360 - (theta1 + 360)
         if theta2 < 0:
-            theta2 = theta2 + 360
+            theta2 = 360 - (theta2 + 360)
     
         if theta1 < theta2:
             print(vel_angle, safe_angles[0])
