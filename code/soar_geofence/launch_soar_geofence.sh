@@ -5,7 +5,7 @@ if [ "$#" -gt 3 ]; then
 	echo usage: launch_soar_geofence.sh --x= --y= --geofence=
 	exit 1
 else
-	geofence=""
+	geofence="default"
 	for i in "$@"; do
 		case $i in 
 			--x=*)
