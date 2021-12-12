@@ -18,8 +18,6 @@ import enum
 from geofence import Geofence
 import argparse
 import json
-import numpy as np
-import veroviz as vrv
 
 HOME_DIRECTORY = os.environ['HOME']
 TELEM_PUB_RATE = 10
@@ -265,93 +263,61 @@ class Uav():
             self.offboard_starting = True
             self.tasks['currentMavCmd'] = self._event_loop.create_task(self.userMavCmdProto[MAV_CMD.MAV_START_OFFBOARD.value](), name='currentMavCmd')
 
-    def monitor_geofence(self, rate):
-        sleepRate = rospy.Rate(rate)
-        while True:
-            if self.flight_mode.name != FlightMode.OFFBOARD.name:
-                self.offboard_starting = False
-                print('Geofence activity paused.')
-                break
+    # def monitor_geofence(self, rate):
+    #     sleepRate = rospy.Rate(rate)
+    #     while True:
+    #         if self.flight_mode.name != FlightMode.OFFBOARD.name:
+    #             self.offboard_starting = False
+    #             print('Geofence activity paused.')
+    #             break
             
-            self.setpoint.vx, self.setpoint.vy, self.setpoint.vz = self.geofence.monitor(
-                                                                        lat=self.telem.lat,
-                                                                        lon=self.telem.lon,
-                                                                        altAGL=self.telem.altAGL,
-                                                                        vx=self.setpoint.vx,
-                                                                        vy=self.setpoint.vy,
-                                                                        vz=self.setpoint.vz,
-                                                                        heading=self.telem.heading
-                                                                    )
-            # if self.geofence.isInFence(lat, lon):
-            #     sorted_dist_fence = self.geofence.dist_to_fences(lat, lon)
-            #     print(sorted_dist_fence)
-            #     if sorted_dist_fence[0][0] < self.geofence.closeToFenceDist:
-            #         fence = self.geofence.fences[sorted_dist_fence[0][1]]
-            #         safe_angles = fence.adjust_safe_headings(self.telem.heading)
-            #         intoFence, vel_angle = fence.is_vel_into_fence(self.setpoint.vx, self.setpoint.vy, self.telem.heading, safe_angles)
+    #         self.setpoint.vx, self.setpoint.vy, self.setpoint.vz = self.geofence.monitor(
+    #                                                                     lat=self.telem.lat,
+    #                                                                     lon=self.telem.lon,
+    #                                                                     altAGL=self.telem.altAGL,
+    #                                                                     vx=self.setpoint.vx,
+    #                                                                     vy=self.setpoint.vy,
+    #                                                                     vz=self.setpoint.vz,
+    #                                                                     heading=self.telem.heading
+    #                                                                 )
+    #         # if self.geofence.isInFence(lat, lon):
+    #         #     sorted_dist_fence = self.geofence.dist_to_fences(lat, lon)
+    #         #     print(sorted_dist_fence)
+    #         #     if sorted_dist_fence[0][0] < self.geofence.closeToFenceDist:
+    #         #         fence = self.geofence.fences[sorted_dist_fence[0][1]]
+    #         #         safe_angles = fence.adjust_safe_headings(self.telem.heading)
+    #         #         intoFence, vel_angle = fence.is_vel_into_fence(self.setpoint.vx, self.setpoint.vy, self.telem.heading, safe_angles)
                     
-            #         if intoFence:
-            #             print('Close to fence %d | Velocity Heading: %d' % (fence.id, vel_angle) )
-            #             self.setpoint.vx *= 0.5
-            #             self.setpoint.vy *= 0.5
-            #             if sorted_dist_fence[0][0] < self.geofence.cornerDist and sorted_dist_fence[1][0] < self.geofence.cornerDist:
-            #                 # corner ?
-            #                 self.setpoint.vx = 0
-            #                 self.setpoint.vy = 0
+    #         #         if intoFence:
+    #         #             print('Close to fence %d | Velocity Heading: %d' % (fence.id, vel_angle) )
+    #         #             self.setpoint.vx *= 0.5
+    #         #             self.setpoint.vy *= 0.5
+    #         #             if sorted_dist_fence[0][0] < self.geofence.cornerDist and sorted_dist_fence[1][0] < self.geofence.cornerDist:
+    #         #                 # corner ?
+    #         #                 self.setpoint.vx = 0
+    #         #                 self.setpoint.vy = 0
 
-            #             elif sorted_dist_fence[0][0] < self.geofence.takeOverDist:
+    #         #             elif sorted_dist_fence[0][0] < self.geofence.takeOverDist:
 
-            #                 vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
-            #                 magnitude = math.sqrt(self.setpoint.vx**2 + self.setpoint.vy**2)
-            #                 self.setpoint.vx = vx_unit * magnitude
-            #                 self.setpoint.vy = vy_unit * magnitude
-            #                 print(vel_angle, self.setpoint.vx, self.setpoint.vy)
+    #         #                 vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
+    #         #                 magnitude = math.sqrt(self.setpoint.vx**2 + self.setpoint.vy**2)
+    #         #                 self.setpoint.vx = vx_unit * magnitude
+    #         #                 self.setpoint.vy = vy_unit * magnitude
+    #         #                 print(vel_angle, self.setpoint.vx, self.setpoint.vy)
 
-            #     if self.setpoint.vz > 0:
-            #         if self.telem.altAGL < self.geofence.min_alt:
-            #             self.setpoint.vz = 0
+    #         #     if self.setpoint.vz > 0:
+    #         #         if self.telem.altAGL < self.geofence.min_alt:
+    #         #             self.setpoint.vz = 0
 
-            #     if self.setpoint.vz < 0:
-            #         if self.telem.altAGL > self.geofence.max_alt:
-            #             self.setpoint.vz = 0
+    #         #     if self.setpoint.vz < 0:
+    #         #         if self.telem.altAGL > self.geofence.max_alt:
+    #         #             self.setpoint.vz = 0
 
-            # else:
-            #     print('WARNING: Outside geofence')
+    #         # else:
+    #         #     print('WARNING: Outside geofence')
 
-            sleepRate.sleep()
-    
-    # async def geofence_check_setpoint(self):
-    #     lat = self.telem.lat
-    #     lon = self.telem.lon
-    #     heading = self.telem.heading
-    #     close, fence, dist = self.geofence.close_to_fence(lat, lon, self.telem.heading)
+    #         sleepRate.sleep()
 
-    #     if close:
-    #         safe_angles = fence.adjust_safe_headings(self.telem.heading)
-    #         # print('Close to fence %d | Safe Heading %s' % (fence.id, safe_headings))
-    #         intoFence, vel_angle = fence.is_vel_into_fence(self.setpoint.vx, self.setpoint.vy, self.telem.heading, safe_angles)
-    #         if intoFence:
-    #             if dist > 2:
-    #                 print('slowing down')
-    #                 self.setpoint.vx *= 0.5
-    #                 self.setpoint.vx *= 0.5
-    #             else:
-    #                 # print(safe_angles)
-    #                 # self.setpoint.vx = 0
-    #                 # self.setpoint.vy = 0
-    #                 vx_unit, vy_unit = fence.slide_fence_vels(vel_angle, safe_angles)
-    #                 magnitude = math.sqrt(self.setpoint.vx**2 + self.setpoint.vy**2)
-    #                 self.setpoint.vx = vx_unit * magnitude
-    #                 self.setpoint.vy = vy_unit * magnitude
-    #                 print(vel_angle, magnitude, self.setpoint.vx, self.setpoint.vy)
-
-    #     if self.setpoint.vz > 0:
-    #         if self.telem.altAGL < 2:
-    #             self.setpoint.vz = 0
-
-    #     if self.setpoint.vz < 0:
-    #         if self.telem.altAGL > 20:
-    #             self.setpoint.vz = 0
 
     # ============================================================================================= #
     #                                         END ROS Functions                                     #
@@ -456,9 +422,9 @@ class Uav():
             await asyncio.sleep(1)
             print('Offboard Ready.')
 
-            self.geofence_on = True
-            geofenceThread = threading.Thread(target=self.monitor_geofence, args=(2,))
-            geofenceThread.start()
+            # self.geofence_on = True
+            # geofenceThread = threading.Thread(target=self.monitor_geofence, args=(2,))
+            # geofenceThread.start()
             
             self.tasks['stream_setpoints'] = self._event_loop.create_task(self.stream_setpoints(SETPOINT_RATE), name='stream_setpoints')
 
@@ -486,6 +452,7 @@ class Uav():
             yield self.setpoint
             await asyncio.sleep(1/rate)
 
+        self.offboard_starting = False
 
     #############################################################################################################
     # --------------------------------------   Vehicle Class Functions ---------------------------------------- #
