@@ -74,24 +74,55 @@ We will reference this figure to describe our logic:
 
 The first step is to be able to calculate perpendicular distances to the fences/edges. This can be done by using the `veroviz` Python package. Using the function `closestPointLoc2Path`, we can find the closest (lat, lon) coordinate along a path, in our case a fence, to the drone's location. We then find the distance from the drone to this coordinate, using a geodesic distance function, from the `geopy` package. We find the distances to each fence and reference the fence with the minimium distance, when redirecting the drone. The coordinate and distance is shown in figure below as the red dot and dashed line to the drone.
 
-If the distance calculated is `<= closeToFenceDist`, we then proceed to determine whether the drone is headed into the fence. We do this by using the drone's heading and velocities `vx` and `vy`. The resulting value is the velocity heading (in degrees), from North. Because the velocity heading is referenced from North, we can determine if this angle is not within the safe angles of the fence. The safe angles for each fence are pre-calculated when loading the geofence 
+If the distance calculated is `<= closeToFenceDist`, we then proceed to determine whether the drone is headed into the fence. We do this by using the drone's heading and velocities `vx` and `vy`. The resulting value is the velocity heading (in degrees), from North. Because the velocity heading is referenced from North, we can determine if this angle is not within the safe angles of the fence. The safe angles for each fence are pre-calculated, from the heading required to travel from one vertex to the other, of a fence. In the figure, the `127` degrees is the heading required to travel along that fence. The safe angles are therefore between `(127, 307)` degrees. Any value below 127 or above 307, would be directed into the fence. 
+
+One the velocity heading is deemed to be directed into the fence and the distance to fence is `<= takeOverDist`, the next step is to calculate the velocities necesssary to slide along the fence.
+
+In the figure, the velocity heading is 70 degrees. Because 70 is closer to 127 than 307, the resulting velocity heading will be 127 instead of 307. And so, the drone travels to the right. In order to calculate the unit vectors `vx` and `vy` that results in this heading, we need to know the angle `a` in the figure. We can calculate this angle using the drone's body heading (50 degrees) and the goal velocity heading. Because the drone's heading is facing 50 degrees from North, the angle now from its heading to 127 (goal velocity heading) is 77 (`127-50`) In this case, the angle `a` is simply this heading, 77. We can then calculate both the `vx` and `vy` necessary for the drone to travel at the angle `a`, from its current heading. **Note**: we assumed a unit vector, where the magnitude is 1. 
+
+Depending on which quadrant the angle falls, here is how `vx` and `vy` are calculated.
+
+| `a` | vx 	| vy |
+| --------------  | ---- | ---- |
+| <= 90		  | cos(a) | sin(a) |
+| <= 180		| - cos(180-a) | sin(180-a) |
+| <= 270 		| - cos(270-a) | - sin(270-a) |
+| <= 360 		| cos(360-a) | - sin(360-a) |
+
+We multiply the unit vectors by the magnitude of the original velocities given by the joystick user.
+
+The drone will keep sliding if the user keeps sending the drone in the direction of the fence, until it has reached a corner. The distance to two adjacent fences at which a corner is identified is specified by `cornerDist`. If the two distances are `<= cornerDist` and the user is sending the drone into either fence, `vx` and `vy` are set to 0.
 
 
+For minimum and maximum altitudes, we define a threshold from `ceilingMetersDist` and `minAGL`, in which the drone is slowed by half its speed. When it reaches the next threshold, the `vz` is set to 0. If drift occurs while the user is not giving velocity inputs and it goes past the limits, we give a small adjustment so that it does not keep drifting past the boundary.
 
-## Getting Started
+---
 
-This project requires and assumes ROS Noetic is installed in your system. Other required installations are listed below.
+## Contributions
+
+We have implemented an interesting geofence environment where the drones do not simply hold, land or RTL when a breach occurs, but instead remap incoming velocities that will breach a fence to slide along this fence.
+
+With some tuning, we hope this will allow guests at SOAR to fly a drone safely and provide the groundwork to add improvements to the system.
+
+## Installation Instructions
+
+We assume you are running Ubuntu 20.04 and have `ROS Noetic`, `catkin` and `Gazebo-11` installed in your system.
+
+List of Prerequisite Software:
+- Python 3.6+
+- Python MAVSDK
+- PX4-Autopilot / SITL
+- Python veroviz
 
 ### MAVSDK
 
-We use the MAVSDK-Python API to interface with the MAVLink enabled PX4 drone, specifically version `0.20.0`. Note that `Python 3.6+` is required.
+We use the MAVSDK-Python API to interface with the MAVLink enabled PX4 drone, specifically version `0.20.0`. Note that Python 3.6+ is required.
 
 ```
 pip3 install mavsdk==0.20.0
 ```
 
 ### PX4-Autopilot
-
 
 - https://docs.px4.io/master/en/simulation/gazebo.html
 - https://docs.px4.io/master/en/dev_setup/dev_env_linux_ubuntu.html#gazebo-jmavsim-and-nuttx-pixhawk-targets
@@ -114,22 +145,17 @@ cd ~/Projects
 git clone https://github.com/dowonlee777/soar_geofence.git
 ```
 
-Make sure `sitl.sh` is executable
-```
-cd soar_geofence/code/soar_geofence/scripts
-chmod +x ./sitl.sh
-```
 
 ### Catkin Workspace
 
-Assumes you have a catkin workspace at `~/catkin_ws`.
+This assumes you have a catkin workspace at `~/catkin_ws/`.
 
-Create our package once:
+Create our package:
 ```
 cd ~/catkin_ws/src
 catkin_create_pkg soar_geofence
 ```
-Copy and paste our `soar_geofence/code/soar_geofence` directory into the `~/catkin_ws/src` directory
+Copy and paste `~/Projects/soar_geofence/code/soar_geofence/` directory into the `~/catkin_ws/src` directory
 
 ```
 cp -R ~/Projects/soar_geofence/code/geofence ~/catkin_ws/src
@@ -140,16 +166,71 @@ cd ~/catkin_ws
 catkin_make
 ```
 
-### To Run
+---
 
-Have a joystick controller (Xbox 360, Xbox 1, Playstation 4, or Playstation 5) connected via USB or Bluetooth.
+## Running the Code
 
-Then run:
+First, have a joystick controller (Xbox One, Playstation 4, or Playstation 5) connected via USB or Bluetooth.
+
+Navigate to the catkin package `soar_geofence`:
 
 ```
 cd ~/catkin_ws/src/soar_geofence
-./launch_soar_geofence.sh
 ```
+You can then use the `launch_soar_geofence.sh`. This will spawn multiple necessary processes in separate terminal tabs.
+```
+./launch_soar_geofence.sh --x=<meters> --y=<meters>
+```
+- You may specify the `x` and `y` coordinate in the Gazebo world frame, where the drone will spawn
+- The default is (20, 0)
+- Note that the origin (0,0) is right on a pole.
+
+The spawned tabs consist of the following processes:
+
+- `roscore`
+- `sitl_run.sh`
+- `uav.py`
+- `joystick.py`
+
+If you need to cancel one process, you may CTRL-C the process and rerun that process in the same terminal. (No need to rerun `launch_soar_geofence.sh`)
+
+### 1. `sitl_run.sh`
+
+This script launches the SITL and Gazebo. 
+
+Usage:
+```
+./sitl_run.sh iris gazebo SOAR_World --x=<meters> --y=<meters>
+```
+
+If you wanted to load a separate Gazebo world, you may create a valid Gazebo `.world` file and save it to `~/catkin_ws/src/soar_geofence/worlds/`. Then specify it instead of `SOAR_World` in the command above. However, be sure to define the `<spherical_coordinates>` tag in your world file.
+
+### 2. `uav.py`
+
+This script launches the UAV node to connect to the SITL and send MAVSDK commands. 
+
+Usage:
+```
+rosrun soar_geofence uav.py --geofence <geofence filename>
+```
+
+The `--geofence` flag is optional, by default we use the `default.json` geofence, located in `~/catkin_ws/src/soar_geofence/geofences/`. 
+
+If you had a JSON file, `myGeofence.json`, you may save it to the geofences directory and use the command:
+```
+rosrun soar_geofence uav.py --geofence myGeofence
+```
+
+### 3. `joystick.py`
+
+This script immediately tries to connect to an available joystick controller. If none is found this script will terminate.
+
+Usage:
+```
+rosrun soar_geofence joystick.py
+```
+---
+
 ## Measures of Success
 <TABLE>
 <TR>
@@ -165,12 +246,20 @@ cd ~/catkin_ws/src/soar_geofence
 	<TD>100%</TD>
 </TR>
 <TR>
-	<TD>SITL drone stops near geofence.</TD>
+	<TD>SITL drone moves along geofence based on angle of approach.</TD>
 	<TD>100%</TD>
 </TR>
 <TR>
-	<TD>SITL drone moves along geofence based on angle of approach.</TD>
+	<TD>SITL drone stops at the corners of geofence.</TD>
 	<TD>100%</TD>
+</TR>
+<TR>
+	<TD>SITL drone cannot ever escape geofence.</TD>
+	<TD>99.9% (Recent tests are successful, but you never know)</TD>
+</TR>
+<TR>
+	<TD>SITL drone returns or is able to re-enter geofence if escaped.</TD>
+	<TD>90%. (It is possible to manually re-enter, but no autonomous commands yet)</TD>
 </TR>
 </TABLE>
 
@@ -188,11 +277,9 @@ cd ~/catkin_ws/src/soar_geofence
 
 ## Future Work
 
-*If a student from next year's class wants to build upon your project, what would you suggest they do?  What suggestions do you have to help get them started (e.g., are there particular Websites they should check out?).*
-
 - Improve upon Gazebo default 'follow' drone camera angle. Currently does not support velocity heading direction or altitiude changes.  
 - Exclusion GeoFence for interior ojbects most notably the lightpoles and for anything in the future that may be added to the interior of the SOAR Facility. 
-
+- We could use more precise slowing down of the drone when approaching a geofence so that it can get as close to the geofence as possible, but never outside.
 ---
 
 ## References/Resources
@@ -209,6 +296,9 @@ cd ~/catkin_ws/src/soar_geofence
 	- https://www.pygame.org/news
 - PX4 Github Page: Drone Usage in a Gazebo Enviroment and Controlling it  
 	- https://github.com/PX4/PX4-Autopilot 
+
+- Python MAVSDK:
+	- https://mavsdk.mavlink.io/main/en/python/
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 

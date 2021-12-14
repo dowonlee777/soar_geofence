@@ -23,6 +23,8 @@ world="$3"
 src_path="${HOME}/PX4-Autopilot"
 build_path="${HOME}/PX4-Autopilot/build/px4_sitl_default"
 
+x=20
+y=0
 for i in "$@"; do
 	case $i in 
 		--x=*)
