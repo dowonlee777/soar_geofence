@@ -142,7 +142,7 @@ catkin_make
 
 ### To Run
 
-Have a joystick controller (Xbox 360) connected via USB.
+Have a joystick controller (Xbox 360, Xbox 1, Playstation 4, or Playstation 5) connected via USB or Bluetooth.
 
 Then run:
 
@@ -150,6 +150,65 @@ Then run:
 cd ~/catkin_ws/src/soar_geofence
 ./launch_soar_geofence.sh
 ```
+## Measures of Success
+<TABLE>
+<TR>
+	<TH>Measures of Success</TH>
+	<TH>Status</TH>
+</TR>
+<TR>
+	<TD>Gazebo World of SOAR is relatively accurate.</TD>
+	<TD>100%</TD>
+</TR>
+<TR>
+	<TD>SITL drone flies given joystick commands.</TD>
+	<TD>100%</TD>
+</TR>
+<TR>
+	<TD>SITL drone stops near geofence.</TD>
+	<TD>100%</TD>
+</TR>
+<TR>
+	<TD>SITL drone moves along geofence based on angle of approach.</TD>
+	<TD>100%</TD>
+</TR>
+</TABLE>
+
+---
+
+## What did you learn from this project?
+*For example, what concepts from class do you now have a solid understanding of?  What new techniques did you learn?*
+*Also, what challenges did you face, and how did you overcome these?  Be specific.*
+
+*Challenges:*
+- Incorporating a life like 'cage' or 'fence' into the Gazebo world and attached to the poles. Two options were investigated. The first being boxes dragged into walls that would be close to 100% transparent. The second was using smaller boxes that would import a material similar in looks to a fence and only display on one side of the box. Making the rest of the box transparent. A purely transparent box was not implemented as it would potentially interfere with our GeoFence, where we would not know at times if the drone was stopped due to out algorithim or the trasparent box. The second option presented a challenge with mirroring a fence material into a box in order to replicate it over the entire outer perimeter. This took a back seat until the GeoFence logic was near completation. 
+- Understanding exactly which geometry parameters that were needed to be taken into account in order to take control of the drone upon coming close to a wall or corner.  The logic behind finding distance and angle to the nearest fence and corner pole. Defining the acceptable degree of motion while taking into account the velocity heading of the drone and walls angle in relation to due North. Upon knowing the drone's angle of attack on the nearest wall, only allowing velocity application in the axis that won't move the drone closer to the fence. Once the drone was clear from the fence re-allowing velocity cotrol on that axis. 
+
+---
+
+## Future Work
+
+*If a student from next year's class wants to build upon your project, what would you suggest they do?  What suggestions do you have to help get them started (e.g., are there particular Websites they should check out?).*
+
+- Improve upon Gazebo default 'follow' drone camera angle. Currently does not support velocity heading direction or altitiude changes.  
+- Exclusion GeoFence for interior ojbects most notably the lightpoles and for anything in the future that may be added to the interior of the SOAR Facility. 
+
+---
+
+## References/Resources
+
+*What resources did you use to help finish this project?*
+- Include links to Websites.  Explain what this Website enabled you to accomplish.
+
+- Getting accustomed to editing make a custom Gazebo world
+	- http://gazebosim.org/tutorials?tut=model_editor
+	- https://learn.turtlebot.com/2015/02/03/6/
+- VeroViz: Vehcile Routing Visualization
+	- https://veroviz.org/
+- PyGame: Python Module for connecting a Microsfot or Sony controller with minimal customizations
+	- https://www.pygame.org/news
+- PX4 Github Page: Drone Usage in a Gazebo Enviroment and Controlling it  
+	- https://github.com/PX4/PX4-Autopilot 
 
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
