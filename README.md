@@ -130,7 +130,7 @@ catkin_make
 
 ### To Run
 
-Have a joystick controller (Xbox 360) connected via USB.
+Have a joystick controller (Xbox 360, Xbox 1, PLaystation 4, or Playstation 5) connected via USB or Bluetooth
 
 Then run:
 
@@ -138,7 +138,25 @@ Then run:
 cd ~/catkin_ws/src/soar_geofence
 ./launch_soar_geofence.sh
 ```
-
+###Measures of Success
+<TABLE>
+<TR>
+	<TH>Gazebo World of SOAR is relatively accurate.</TH>
+	<TH>100%</TH>
+</TR>
+<TR>
+	<TD>SITL drone flies given joystick commands.</TD>
+	<TD>100%</TD>
+</TR>
+<TR>
+	<TD>SITL drone stops near geofence.</TD>
+	<TD>100%</TD>
+</TR>
+<TR>
+	<TD>SITL drone moves along geofence based on angle of approach.</TD>
+	<TD>100%</TD>
+</TR>
+</TABLE>
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Organizing your Repository
