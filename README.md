@@ -35,9 +35,33 @@ By default, the Gazebo simulator does not have a sense of an ellipsoidal earth a
 
 We used these constants to calculate the (x,y) positions of each pole.
 
+![](images/soar_gazebo.png)
+
 ### Geofence Logic
 
-Our default geofence is defined by 4 coordinates that define an inner rectangle of SOAR, as seen in the dimension diagram from earlier. From these coordinates we define the fences. We assume the adjacent coordinates in the sequence given share an edge, or "fence". 
+Our default geofence is defined by 4 coordinates that define an inner rectangle of SOAR, as seen in the dimension diagram from earlier. From these coordinates we define the fences. We assume the adjacent coordinates in the list given share an edge, or "fence". The default geofence is defined by a JSON file located in `/soar_geofence/code/soar_geofence/geofences/`. A custom geofence using the default format can be saved here and loaded when running the `uav.py` script. Here is the default geofence JSON contents and what each attribute represents:
+
+Default Geofence:
+```
+{
+    "geofence": {
+        "poly": [[42.99559635044619, -78.79735971011293, 181.28],
+            [42.99531277502557, -78.79685522306578, 180.59],
+            [42.99551134918702, -78.79665526993782, 180.9],
+            [42.99579492459777, -78.79715975860931, 181.44]],
+        "ceilingMetersAGL": 22,
+        "minAGL": 2,
+        "closeToFenceDist": 4,
+        "takeOverDist": 2,
+        "cornerDist": 2
+    }
+}
+```
+
+| JSON Geofence Attribute | Meaning  		 |
+| --------------------    | ---------------- |
+| 
+
 
 
 ![](images/geofence_diagram_2.png)
