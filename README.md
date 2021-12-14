@@ -39,9 +39,10 @@ We used these constants to calculate the (x,y) positions of each pole.
 
 ### Geofence Logic
 
-Our default geofence is defined by 4 coordinates that define an inner rectangle of SOAR, as seen in the dimension diagram from earlier. From these coordinates we define the fences. We assume the adjacent coordinates in the list given share an edge, or "fence". The default geofence is defined by a JSON file located in `/soar_geofence/code/soar_geofence/geofences/`. A custom geofence using the default format can be saved here and loaded when running the `uav.py` script. Here is the default geofence JSON contents and what each attribute represents:
+Our default geofence is defined by 4 coordinates that define an inner rectangle of SOAR, as seen in the dimension diagram from earlier. From these coordinates we define the fences. We assume the adjacent coordinates in the list given share an edge, or "fence". The default geofence is defined by a JSON file located in `/soar_geofence/code/soar_geofence/geofences/`. A custom geofence using the default format can be saved here and loaded when running the `uav.py` script. 
 
-Default Geofence:
+The following is the JSON contents of the default geofence:
+
 ```
 {
     "geofence": {
@@ -58,13 +59,24 @@ Default Geofence:
 }
 ```
 
-| JSON Geofence Attribute | Meaning  		 |
+| JSON Geofence Attribute | Value  		 |
 | --------------------    | ---------------- |
-| 
+| `poly`			  |    List of coordinates: [ [lat, lon, alt], [lat, lon, alt] ... ]|
+| `ceilingMetersAGL`     | Maximum altitude above ground, in meters 		  |
+| `minAGL` 				 | Minimum altitude above ground, in meters        |
+| `closeToFenceDist`     | The distance to fence at which the uav begins to slow down (if flying into fence) |
+| `takeOverDist`         | The distance to fence at which the uav is redirected (if flying into fence)|
+| `cornerDist` 			  | The distance between two adjacent fences to be considered in the corner, at which the uav stops (if flying into fence) |
 
-
+We will reference this figure to describe our logic:
 
 ![](images/geofence_diagram_2.png)
+
+The first step is to be able to calculate perpendicular distances to the fences/edges. This can be done by using the `veroviz` Python package. Using the function `closestPointLoc2Path`, we can find the closest (lat, lon) coordinate along a path, in our case a fence, to the drone's location. We then find the distance from the drone to this coordinate, using a geodesic distance function, from the `geopy` package. We find the distances to each fence and reference the fence with the minimium distance, when redirecting the drone. The coordinate and distance is shown in figure below as the red dot and dashed line to the drone.
+
+If the distance calculated is `<= closeToFenceDist`, we then proceed to determine whether the drone is headed into the fence. We do this by using the drone's heading and velocities `vx` and `vy`. The resulting value is the velocity heading (in degrees), from North. Because the velocity heading is referenced from North, we can determine if this angle is not within the safe angles of the fence. The safe angles for each fence are pre-calculated when loading the geofence 
+
+
 
 ## Getting Started
 
