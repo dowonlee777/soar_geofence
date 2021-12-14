@@ -6,6 +6,8 @@ if [ "$#" -gt 3 ]; then
 	exit 1
 else
 	geofence="default"
+	x=20
+	y=0
 	for i in "$@"; do
 		case $i in 
 			--x=*)

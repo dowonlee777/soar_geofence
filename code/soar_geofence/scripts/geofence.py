@@ -41,7 +41,29 @@ class Geofence():
         return fences
     
     def monitor(self, lat, lon, altAGL, vx, vy, vz, heading):
-        # if self.isInFence(lat, lon):
+
+        if vz > 0:
+
+            if altAGL < self.min_alt + 0.3:
+                vz = 0
+            if altAGL < self.min_alt + 2:
+                vz *= 0.5
+  
+
+        elif vz < 0:
+            if altAGL > self.max_alt - 2:
+                vz *= 0.5
+            if altAGL > self.max_alt - 1:
+                vz = 0
+
+        else:
+            if altAGL <= self.min_alt:
+                print('Adjusting upwards')
+                vz = -0.1
+            elif altAGL >= self.max_alt:
+                print('Adjusting downwards')
+                vz = 0.1
+                
         sorted_dist_fence = self.dist_to_fences(lat, lon)
             
         if sorted_dist_fence[0][0] < self.closeToFenceDist:
@@ -76,14 +98,6 @@ class Geofence():
                         print('Goal Heading: %s | Velocity Heading: %f' % (fence_1.safe_headings, fence_1.vels_heading(vx, vy, heading)))
                         # print('vx: %f | vy: %f | vel_heading: %f' % (vx, vy, vel_angle))
                         print(vel_angle, vx, vy)
-
-        if vz > 0:
-            if altAGL < self.min_alt:
-                vz = 0
-
-        if vz < 0:
-            if altAGL > self.max_alt:
-                vz = 0
 
         # else:
         #     print('WARNING: Outside geofence')
@@ -285,6 +299,8 @@ if __name__ == "__main__":
     gf = Geofence(nodes, maxAGL=22, minAGL=2)
 
     [print(fence.safe_headings) for fence in gf.fences]
-    fence = gf.fences[0]
-    print(fence.safe_headings, fence.is_vel_into_fence(310, (0, 0)))
-    print(gf.getHeading(42.99559635044619, -78.79735971011293, 42.99579492459777, -78.79715975860931))
+    fence = gf.fences[3]
+    print(fence.safe_headings, fence.is_vel_into_fence(70, (0, 0)))
+    print(fence.adjust_safe_headings(50))
+    print(fence.slide_fence_vels(70, fence.adjust_safe_headings(50)))
+    # print(gf.getHeading(42.99559635044619, -78.79735971011293, 42.99579492459777, -78.79715975860931))

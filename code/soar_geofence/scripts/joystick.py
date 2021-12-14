@@ -7,6 +7,7 @@ from soar_geofence.msg import mav_cmd
 from uav import MAV_CMD
 import math
 import enum
+import re
 
 ''' 
 XBox Controller Details:
@@ -43,11 +44,38 @@ XBox Controller Details:
 
 REFRESH_RATE = 2
 
-class Axis(enum.Enum):
+class XboxOneAxis(enum.Enum):
+    YAW_AXIS        = 0             # 0 --> left stick, x axis. 
+    THROTTLE_AXIS 	= 1				# 1 --> left stick, y axis.  
+    STEERING_AXIS 	= 3				# 3 --> right stick, x axis.
+    PITCH_AXIS      = 4             # 4 --> right stick, y axis.
+
+class PS4Axis(enum.Enum):
+    YAW_AXIS        = 0             # 0 --> left stick, x axis. 
+    THROTTLE_AXIS 	= 1				# 1 --> left stick, y axis.  
+    STEERING_AXIS 	= 3				# 3 --> right stick, x axis.
+    PITCH_AXIS      = 4             # 4 --> right stick, y axis.
+
+class PS5Axis(enum.Enum):
     YAW_AXIS        = 0
-    THROTTLE_AXIS 	= 1				# 1 --> left stick, y axis.  4 --> right stick, y axis.
-    STEERING_AXIS 	= 3				# 0 --> left stick, x axis.  3 --> right stick, x axis.
-    PITCH_AXIS      = 4
+    THROTTLE_AXIS 	= 1				
+    STEERING_AXIS 	= 2				# 2 --> right stick, x axis
+    PITCH_AXIS      = 5             # 5 --> right stick, y axis
+
+class XboxOneButtons(enum.Enum):
+    LAND            = 0
+    TAKEOFF         = 3
+    ARM             = 8
+
+class PS5Buttons(enum.Enum):
+    LAND            = 1
+    TAKEOFF         = 3
+    ARM             = 12
+
+# class PS4Buttons(enum.Enum):
+#     LAND            = 0
+#     TAKEOFF         = 3
+#     ARM             = 5
 
 MAX_THROTTLE	= 5	    # m/s
 MAX_STEERING	= 3	    # m/s	
@@ -89,7 +117,27 @@ class UavJoystick():
             hats = self.joystick.get_numhats()
             print("Number of hats: {}".format(hats) )
 
-            self.connected = True
+            if re.search("XBox One", name):
+                print('XBox One Mappings Loaded!')
+                self.axis = XboxOneAxis
+                self.buttons = XboxOneButtons
+                self.connected = True
+
+            elif axes == 6 and buttons == 14 and hats == 1:
+                # PS5
+                print('PS5 Mappings Loaded!')
+                self.axis = PS5Axis
+                self.buttons = PS5Buttons
+                self.connected = True
+            
+            elif axes == 6 and buttons == 16:
+                print('PS4 Mappings Loaded')
+                self.axis = XboxOneAxis
+                self.buttons = XboxOneButtons
+                self.connected = True
+
+            else:
+                self.connected = False
         
         self.rate = rospy.Rate(REFRESH_RATE)
         
@@ -160,25 +208,25 @@ class UavJoystick():
                     '''
 
                     
-                    if event.axis == Axis.THROTTLE_AXIS.value:
+                    if event.axis == self.axis.THROTTLE_AXIS.value:
                         if abs(event.value) > 0.1:
                             self.vel_cmd.vz = event.value * MAX_THROTTLE
                         else:
                             self.vel_cmd.vz = 0
 
-                    elif event.axis == Axis.STEERING_AXIS.value:
+                    elif event.axis == self.axis.STEERING_AXIS.value:
                         if abs(event.value) > 0.1:
                             self.vel_cmd.vy = event.value * MAX_STEERING
                         else:
                             self.vel_cmd.vy = 0
                     
-                    elif event.axis == Axis.PITCH_AXIS.value:
+                    elif event.axis == self.axis.PITCH_AXIS.value:
                         if abs(event.value) > 0.1:
                             self.vel_cmd.vx = -event.value * MAX_PITCH
                         else:
                             self.vel_cmd.vx = 0
                     
-                    elif event.axis == Axis.YAW_AXIS.value:
+                    elif event.axis == self.axis.YAW_AXIS.value:
                         if abs(event.value) > 0.1:
                             self.vel_cmd.yaw = event.value * MAX_YAW
                         else:
@@ -191,12 +239,12 @@ class UavJoystick():
 
     def publish_button_press(self, button):
         cmd = mav_cmd()
-        if button == 8:
+        if button == self.buttons.ARM.value:
             cmd.command = MAV_CMD.MAV_ARM.value
             # cmd.command = MAV_CMD.MAV_ARM_AND_TAKEOFF.value
-        elif button == 0:
+        elif button == self.buttons.LAND.value:
             cmd.command = MAV_CMD.MAV_LAND.value
-        elif button == 3:
+        elif button == self.buttons.TAKEOFF.value:
             cmd.command = MAV_CMD.MAV_ARM_AND_TAKEOFF.value
 
         self.pub_mav_cmd.publish(cmd)
