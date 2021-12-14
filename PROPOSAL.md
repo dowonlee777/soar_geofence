@@ -9,9 +9,11 @@ Team Members:
 
 ## Project Objective
 
-This course project is motivated by SOAR, an outdoor facility for drone research. It is a netted enclsoure allowing for both autonomous and manual flight. Although the netting prevents drones from escaping the facility, it would be ideal to prevent a drone from ever hitting the net resulting in getting stuck or a crash to the floor. The open source drone autopilots such as PX4 and ArduPilot have geofence functionality but seems to only implement failsafes (hold, return to home) once a breach occurs. We aim to implement geofence logic that identifies if a drone's thrust and trajectory will exceed the encolsure. The drone will be redirected along the boundary of the geofence, based on the angle of its approach. In testing of our logic, we will control a simulated drone with an Xbox controller. This is representative of a real use case in SOAR, and would allow for inexperienced pilots and even guests at the facility to fly safely.
+This course project is motivated by SOAR, an outdoor facility for drone research. It is a netted enclsoure allowing for both autonomous and manual flight. One of the many interests of this facility is to provide a system for safe manual flight of drones so that even visitors, who have never flown a drone, can do so with minimal risk of crashing. Although the netting prevents drones from escaping the facility, if a drone hits the netting it will likely get stuck and it becomes difficult (potentially expensive) to retrieve. A geofence is a solution to this problem, and although drone autopilots, such as PX4 and ArduPilot, can be given geofences, they seem to simply implement failsafes (hold, return to launch) once a breach occurs. Our project implements a slightly more proactive and interesting geofence logic.
 
-Similarly, we will also implement a low altitude boundary to ensure a drone does not crash in the middle of a flight (This must be switched off when a land command is given).
+Based on the angle of approach, the drone will be redirected along the boundary of the geofence. In testing of our logic, we will control a simulated PX4 drone with a joystick (PS4/Xbox).
+
+Similarly, we will also implement altitude boundaries to ensure a drone does not crash in the middle of a flight or surpass the maximum altitude.
 
 We will leverage ROS to share information between the SITL, joystick controller and geofence monitor nodes. The planned framework is roughly scripted in the flowchart below.
 
