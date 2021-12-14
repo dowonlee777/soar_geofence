@@ -138,7 +138,7 @@ Then run:
 cd ~/catkin_ws/src/soar_geofence
 ./launch_soar_geofence.sh
 ```
-### Measures of Success
+## Measures of Success
 <TABLE>
 <TR>
 	<TH>Measures of Success</TH>
@@ -161,6 +161,33 @@ cd ~/catkin_ws/src/soar_geofence
 	<TD>100%</TD>
 </TR>
 </TABLE>
+
+---
+
+## What did you learn from this project?
+
+*For example, what concepts from class do you now have a solid understanding of?  What new techniques did you learn?*
+
+*Also, what challenges did you face, and how did you overcome these?  Be specific.*
+
+---
+
+## Future Work
+
+*If a student from next year's class wants to build upon your project, what would you suggest they do?  What suggestions do you have to help get them started (e.g., are there particular Websites they should check out?).*
+- Improve upon Gazebo default 'follow' drone camera angle. Currently does not support velocity heading direction or altitiude changes.  
+- Exclusion GeoFence for interior ojbects most notably the lightpoles and for anything in the future that may be added to the interior of the SOAR Facility. 
+
+---
+
+## References/Resources
+
+*What resources did you use to help finish this project?*
+- Include links to Websites.  Explain what this Website enabled you to accomplish.
+- Include references to particular chapters/pages from the ROS book.  Why was each chapter necessary/helpful?
+- Getting accustomed to editing make a custom Gazebo world
+	- http://gazebosim.org/tutorials?tut=model_editor
+
 --------------------------------------------------------------------------------------------------------------------------------------------------------
 
 ## Organizing your Repository
